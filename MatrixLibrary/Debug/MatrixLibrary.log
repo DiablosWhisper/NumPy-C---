@@ -1,0 +1,25 @@
+﻿  Main.cpp
+c1xx : warning C4199: two-phase name lookup is not supported for C++/CLI, C++/CX, or OpenMP; use /Zc:twoPhase-
+c:\users\gleb\source\repos\matrixlibrary\matrixlibrary\main.cpp(12): warning C4326: return type of 'main' should be 'int' instead of 'void'
+c:\users\gleb\source\repos\matrixlibrary\matrixlibrary\matrixlibrary.h(1445): warning C4244: '+=': conversion from 'double' to 'Type', possible loss of data
+          with
+          [
+              Type=float
+          ]
+  c:\users\gleb\source\repos\matrixlibrary\matrixlibrary\matrixlibrary.h(1423): note: while compiling class template member function 'Type Matrix<Type>::R_Determinant(void)'
+          with
+          [
+              Type=float
+          ]
+  c:\users\gleb\source\repos\matrixlibrary\matrixlibrary\matrixlibrary.h(1405): note: see reference to function template instantiation 'Type Matrix<Type>::R_Determinant(void)' being compiled
+          with
+          [
+              Type=float
+          ]
+  c:\users\gleb\source\repos\matrixlibrary\matrixlibrary\main.cpp(13): note: see reference to class template instantiation 'Matrix<float>' being compiled
+c:\users\gleb\source\repos\matrixlibrary\matrixlibrary\matrixlibrary.h(1456): warning C4244: 'return': conversion from 'double' to 'Type', possible loss of data
+          with
+          [
+              Type=float
+          ]
+  MatrixLibrary.vcxproj -> C:\Users\Gleb\source\repos\MatrixLibrary\Debug\MatrixLibrary.exe
