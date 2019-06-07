@@ -294,8 +294,6 @@ public:
 
 		Matrix<Type> InverseMatrix(FirstTemporary);
 
-		delete FirstTemporary;
-
 		if (SomeMatrix.R_Determinant() != 0) {
 
 			for (; fabs((SomeMatrix.R_Multiply(InverseMatrix))->R_Determinant() - 1) >= Epsilon;) {
@@ -307,11 +305,7 @@ public:
 				InverseMatrix = InverseMatrix.R_Multiply(-1).R_Add(SecondTemporary);
 
 				InverseMatrix = PreviousStep.R_Multiply(InverseMatrix);
-
-				delete PreviousStep;
 			}
-
-			delete SecondTemporary;
 
 			return InverseMatrix;
 		}
@@ -626,18 +620,18 @@ public:
 	};
 
 	/*[Matrix] Outter Static Methods*/
-	static Matrix* R_LoadFromFIle(const Matrix& SomeMatrix, string Path, char Delimiter) {
+	static Matrix R_LoadFromFIle(const Matrix& SomeMatrix, string Path, char Delimiter) {
 
 		ifstream Input(Path);
-
-		int Height = 0, Length = 0;
-
-		string Item, Text;
 
 		if (!Input.is_open()) {
 
 			return nullptr;
 		}
+
+		int Height = 0, Length = 0;
+
+		string Item, Text;
 
 		getline(Input, Text, '\n');
 
@@ -914,14 +908,14 @@ public:
 
 		ifstream Input(Path);
 
-		int Height = 0, Length = 0;
-
-		string Item, Text;
-
 		if (!Input.is_open()) {
 
 			return nullptr;
 		}
+
+		int Height = 0, Length = 0;
+
+		string Item, Text;
 
 		getline(Input, Text, '\n');
 
@@ -1732,14 +1726,14 @@ public:
 
 		ifstream Input(Path);
 
-		int Height = 0, Length = 0;
-
-		string Item, Text;
-
 		if (!Input.is_open()) {
 
 			return nullptr;
 		}
+
+		int Height = 0, Length = 0;
+
+		string Item, Text;
 
 		getline(Input, Text, '\n');
 
@@ -2016,14 +2010,14 @@ public:
 
 		ifstream Input(Path);
 
-		int Height = 0, Length = 0;
-
-		string Item,Text;
-
 		if (!Input.is_open()) {
 
 			return nullptr;
 		}
+
+		int Height = 0, Length = 0;
+
+		string Item,Text;
 
 		getline(Input, Text, '\n');
 
