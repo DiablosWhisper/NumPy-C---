@@ -1036,7 +1036,7 @@ public:
 
 		for (int Index = 0; Index < Power; Index++) {
 
-			Temporary = Temporary.P_Add(SomeMatrix->P_Multiply(SomeMatrix));
+			Temporary = Temporary->P_Add(SomeMatrix->P_Multiply(SomeMatrix));
 		}
 
 		return Temporary;
@@ -1856,7 +1856,7 @@ public:
 
 		for (int Index = 0; Index < Power; Index++) {
 
-			Temporary = Temporary.Add(this.Multiply(this));
+			Temporary = Temporary.R_Add(this->R_Multiply(this));
 		}
 
 		return Temporary;
@@ -2140,7 +2140,7 @@ public:
 
 		for (int Index = 0; Index < Power; Index++) {
 
-			Temporary = Temporary->Add(this->Multiply(this));
+			Temporary = Temporary->P_Add(this->P_Multiply(this));
 		}
 
 		return Temporary;
