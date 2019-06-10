@@ -89,7 +89,7 @@ private:
 public:
 	/*[Matrix] Outter Static Matrix Methods*/
 
-	static Matrix R_Cut(const Matrix& SomeMatrix, int StartX, int StartY, int EndX, int EndY) {
+	static Matrix R_Cut(Matrix& SomeMatrix, int StartX, int StartY, int EndX, int EndY) {
 
 		CheckParameters(&SomeMatrix);
 
@@ -105,7 +105,7 @@ public:
 
 		return Temporary;
 	};
-	static Type R_ScalarProduct(const Matrix& FirstMatrix, const Matrix& SecondMatrix) {
+	static Type R_ScalarProduct(Matrix& FirstMatrix, Matrix& SecondMatrix) {
 
 		CheckSummationAndSubtraction(&FirstMatrix, &SecondMatrix);
 
@@ -121,7 +121,7 @@ public:
 
 		return Scalar;
 	};
-	static Matrix R_Subtract(const Matrix& FirstMatrix, const Matrix& SecondMatrix) {
+	static Matrix R_Subtract(Matrix& FirstMatrix, Matrix& SecondMatrix) {
 
 		CheckSummationAndSubtraction(&FirstMatrix, &SecondMatrix);
 
@@ -144,7 +144,7 @@ public:
 
 		return Temporary;
 	};
-	static Matrix R_Multiply(const Matrix& FirstMatrix, const Matrix& SecondMatrix) {
+	static Matrix R_Multiply(Matrix& FirstMatrix, Matrix& SecondMatrix) {
 
 		CheckMultiplication(&FirstMatrix, &SecondMatrix);
 
@@ -191,7 +191,7 @@ public:
 
 		return Temporary;
 	};
-	static Matrix R_Product(const Matrix& FirstMatrix, const Matrix& SecondMatrix) {
+	static Matrix R_Product(Matrix& FirstMatrix, Matrix& SecondMatrix) {
 
 		CheckSummationAndSubtraction(&FirstMatrix, &SecondMatrix);
 
@@ -214,7 +214,7 @@ public:
 
 		return Temporary;
 	};
-	static Matrix R_Add(const Matrix& FirstMatrix, const Matrix& SecondMatrix) {
+	static Matrix R_Add(Matrix& FirstMatrix, Matrix& SecondMatrix) {
 
 		CheckSummationAndSubtraction(&FirstMatrix, &SecondMatrix);
 
@@ -237,7 +237,7 @@ public:
 
 		return Temporary;
 	};
-	static Matrix R_Multiply(const Matrix& SomeMatrix, Type Coefficient) {
+	static Matrix R_Multiply(Matrix& SomeMatrix, Type Coefficient) {
 
 		CheckParameters(&SomeMatrix);
 
@@ -260,7 +260,7 @@ public:
 
 		return Temporary;
 	};
-	static Matrix R_Inverse(const Matrix& SomeMatrix, double Epsilon) {
+	static Matrix R_Inverse(Matrix& SomeMatrix, double Epsilon) {
 
 		CheckSquareness(&SomeMatrix);
 
@@ -294,7 +294,7 @@ public:
 
 		if (SomeMatrix.R_Determinant() != 0) {
 
-			for (; fabs((SomeMatrix.R_Multiply(InverseMatrix))->R_Determinant() - 1) >= Epsilon;) {
+			for (; fabs((SomeMatrix.R_Multiply(InverseMatrix)).R_Determinant() - 1) >= Epsilon;) {
 
 				Matrix<Type> PreviousStep(InverseMatrix);
 
@@ -310,7 +310,7 @@ public:
 
 		return nullptr;
 	};
-	static Type R_Determinant(const Matrix& SomeMatrix) {
+	static Type R_Determinant(Matrix& SomeMatrix) {
 
 		CheckSquareness(&SomeMatrix);
 
@@ -577,7 +577,7 @@ public:
 
 		CheckSquareness(SomeMatrix);
 
-		Matrix<Type>* Temporary = new Matrix(SomeMatrix);
+		Matrix<Type>* Temporary = new Matrix<Type>(SomeMatrix);
 
 		double Value = 1;
 
@@ -613,7 +613,7 @@ public:
 
 	/*[Matrix] Outter Static Methods*/
 
-	static Matrix R_LoadFromFIle(const Matrix& SomeMatrix, string Path, char Delimiter) {
+	static Matrix R_LoadFromFIle(Matrix& SomeMatrix, string Path, char Delimiter) {
 
 		ifstream Input(Path);
 
@@ -681,9 +681,9 @@ public:
 
 		return SomeMatrix;
 	};
-	static Matrix R_UseFunction(const Matrix& SomeMatrix, Type(*Function)(Type)) {
+	static Matrix R_UseFunction(Matrix& SomeMatrix, Type(*Function)(Type)) {
 
-		CheckParameters(SomeMatrix);
+		CheckParameters(&SomeMatrix);
 
 		Matrix<Type> Temporary(SomeMatrix.Height, SomeMatrix.Length);
 
@@ -697,7 +697,7 @@ public:
 
 		return Temporary;
 	};
-	static Matrix R_Reshape(const Matrix& SomeMatrix, int Height, int Length) {
+	static Matrix R_Reshape(Matrix& SomeMatrix, int Height, int Length) {
 
 		CheckParameters(&SomeMatrix);
 
@@ -739,7 +739,7 @@ public:
 
 		return Temporary;
 	};
-	static Matrix R_Exponentiate(const Matrix& SomeMatrix, int Power) {
+	static Matrix R_Exponentiate(Matrix& SomeMatrix, int Power) {
 
 		CheckParameters(&SomeMatrix);
 
@@ -752,7 +752,7 @@ public:
 
 		return Temporary;
 	};
-	static Matrix R_Fill(const Matrix& SomeMatrix, Type Value) {
+	static Matrix R_Fill(Matrix& SomeMatrix, Type Value) {
 
 		CheckParameters(&SomeMatrix);
 
@@ -766,7 +766,7 @@ public:
 
 		return SomeMatrix;
 	};
-	static Matrix R_Randomize(const Matrix& SomeMatrix) {
+	static Matrix R_Randomize(Matrix& SomeMatrix) {
 
 		CheckParameters(&SomeMatrix);
 
@@ -782,7 +782,7 @@ public:
 
 		return SomeMatrix;
 	};
-	static Matrix R_UnitFilling(const Matrix& SomeMatrix) {
+	static Matrix R_UnitFilling(Matrix& SomeMatrix) {
 
 		CheckSquareness(&SomeMatrix);
 
@@ -793,7 +793,7 @@ public:
 
 		return SomeMatrix;
 	};
-	static Matrix R_Transpose(const Matrix& SomeMatrix) {
+	static Matrix R_Transpose(Matrix& SomeMatrix) {
 
 		CheckParameters(&SomeMatrix);
 
@@ -816,7 +816,7 @@ public:
 
 		return Temporary;
 	};
-	static Type R_Average(const Matrix& SomeMatrix) {
+	static Type R_Average(Matrix& SomeMatrix) {
 
 		CheckParameters(&SomeMatrix);
 
@@ -832,7 +832,7 @@ public:
 
 		return Value / (SomeMatrix.Height * SomeMatrix.Length);
 	};
-	static Matrix R_Clear(const Matrix& SomeMatrix) {
+	static Matrix R_Clear(Matrix& SomeMatrix) {
 
 		CheckParameters(&SomeMatrix);
 
@@ -846,7 +846,7 @@ public:
 
 		return SomeMatrix;
 	};
-	static Matrix R_Print(const Matrix& SomeMatrix) {
+	static Matrix R_Print(Matrix& SomeMatrix) {
 
 		CheckParameters(&SomeMatrix);
 
@@ -864,7 +864,7 @@ public:
 
 		return SomeMatrix;
 	};
-	static Type R_Rate(const Matrix& SomeMatrix) {
+	static Type R_Rate(Matrix& SomeMatrix) {
 
 		CheckParameters(&SomeMatrix);
 
@@ -880,7 +880,7 @@ public:
 
 		return sqrt(Value);
 	};
-	static Type R_Max(const Matrix& SomeMatrix) {
+	static Type R_Max(Matrix& SomeMatrix) {
 
 		CheckParameters(&SomeMatrix);
 
@@ -1669,7 +1669,7 @@ public:
 
 		CheckSquareness();
 
-		Matrix<Type>* Temporary = new Matrix(this);
+		Matrix<Type>* Temporary = new Matrix<Type>(this);
 
 		double Value = 1;
 
