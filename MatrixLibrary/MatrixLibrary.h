@@ -17,6 +17,7 @@ class Matrix {
 #pragma region
 private:
 	/*[Matrix] Inner Static Exceptions*/
+
 	static void CheckSummationAndSubtraction(const Matrix* FirstMatrix, const Matrix* SecondMatrix) {
 
 		if (FirstMatrix->Length != SecondMatrix->Length || FirstMatrix->Height != SecondMatrix->Height) {
@@ -47,6 +48,7 @@ private:
 	};
 
 	/*[Matrix] Inner Exceptions*/
+
 	void CheckSummationAndSubtraction(const Matrix* SomeMatrix) {
 
 		if (Length != SomeMatrix->Length || Height != SomeMatrix->Height) {
@@ -77,6 +79,7 @@ private:
 	};
 
 	/*[Matrix] Properties*/
+
 	Type** InnerMatrix;
 	int Length;
 	int Height;
@@ -85,6 +88,7 @@ private:
 #pragma region
 public:
 	/*[Matrix] Outter Static Matrix Methods*/
+
 	static Matrix R_Cut(const Matrix& SomeMatrix, int StartX, int StartY, int EndX, int EndY) {
 
 		CheckParameters(&SomeMatrix);
@@ -214,7 +218,7 @@ public:
 
 		CheckSquareness(&FirstMatrix);
 
-		return FirstMatrix.R_Multiply(SecondMatrix.R_Inverse());
+		return FirstMatrix.R_Multiply(SecondMatrix.R_Inverse(0.01));
 	};
 	static Matrix R_Add(const Matrix& FirstMatrix, const Matrix& SecondMatrix) {
 
@@ -477,7 +481,7 @@ public:
 
 		CheckSquareness(FirstMatrix);
 
-		return FirstMatrix->P_Multiply(SecondMatrix->P_Inverse());
+		return FirstMatrix->P_Multiply(SecondMatrix->P_Inverse(0.01));
 	};
 	static Matrix* P_Add(Matrix* FirstMatrix, Matrix* SecondMatrix) {
 
@@ -620,6 +624,7 @@ public:
 	};
 
 	/*[Matrix] Outter Static Methods*/
+
 	static Matrix R_LoadFromFIle(const Matrix& SomeMatrix, string Path, char Delimiter) {
 
 		ifstream Input(Path);
@@ -1187,6 +1192,7 @@ public:
 	};
 
 	/*[Matrix] Outter Matrix Methods*/
+
 	Matrix R_Cut(int StartX, int StartY, int EndX, int EndY) {
 
 		CheckParameters();
@@ -1316,7 +1322,7 @@ public:
 
 		CheckSquareness();
 
-		return this->R_Multiply(SomeMatrix.R_Inverse());
+		return this->R_Multiply(SomeMatrix.R_Inverse(0.01));
 	};
 	Matrix R_Add(const Matrix& SomeMatrix) {
 
@@ -1579,7 +1585,7 @@ public:
 
 		CheckSquareness();
 
-		return this->P_Multiply(SomeMatrix->P_Inverse());
+		return this->P_Multiply(SomeMatrix->P_Inverse(0.01));
 	};
 	Matrix* P_Add(Matrix* SomeMatrix) {
 
@@ -1722,6 +1728,7 @@ public:
 	};
 
 	/*[Matrix] Outter Methods*/
+
 	Matrix R_LoadFromFIle(string Path, char Delimiter) {
 
 		ifstream Input(Path);
@@ -2291,6 +2298,7 @@ public:
 	};
 
 	/*[Matrix] Outter Getters*/
+
 	int GetLength() {
 
 		return Length;
@@ -2305,6 +2313,7 @@ public:
 	};
 
 	/*[Matrix] Properties*/
+
 	Matrix(const Matrix& SomeMatrix) : Length(SomeMatrix.Length), Height(SomeMatrix.Height) {
 
 		InnerMatrix = new Type*[Height];
@@ -2373,6 +2382,7 @@ public:
 	};
 
 	/*[Matrix] Operators*/
+
 	template<typename Type>
 	friend ostream& operator << (ostream& Stream, const Matrix<Type>& SomeMatrix) {
 
@@ -2475,6 +2485,7 @@ public:
 
 #pragma region
 /*[Matrix] Additional Functions*/
+
 template<typename Type>
 inline Type** ConvertMatrixToArrayMatrix(Matrix<Type>* SomeMatrix) {
 
