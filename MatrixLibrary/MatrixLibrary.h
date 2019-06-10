@@ -214,12 +214,6 @@ public:
 
 		return Temporary;
 	};
-	static Matrix R_Divide(const Matrix& FirstMatrix, const Matrix& SecondMatrix) {
-
-		CheckSquareness(&FirstMatrix);
-
-		return FirstMatrix.R_Multiply(SecondMatrix.R_Inverse(0.01));
-	};
 	static Matrix R_Add(const Matrix& FirstMatrix, const Matrix& SecondMatrix) {
 
 		CheckSummationAndSubtraction(&FirstMatrix, &SecondMatrix);
@@ -476,12 +470,6 @@ public:
 		}
 
 		return Temporary;
-	};
-	static Matrix* P_Divide(Matrix* FirstMatrix, Matrix* SecondMatrix) {
-
-		CheckSquareness(FirstMatrix);
-
-		return FirstMatrix->P_Multiply(SecondMatrix->P_Inverse(0.01));
 	};
 	static Matrix* P_Add(Matrix* FirstMatrix, Matrix* SecondMatrix) {
 
@@ -1318,12 +1306,6 @@ public:
 
 		return Temporary;
 	};
-	Matrix R_Divide(const Matrix& SomeMatrix) {
-
-		CheckSquareness();
-
-		return this->R_Multiply(SomeMatrix.R_Inverse(0.01));
-	};
 	Matrix R_Add(const Matrix& SomeMatrix) {
 
 		CheckSummationAndSubtraction(&SomeMatrix);
@@ -1580,12 +1562,6 @@ public:
 		}
 
 		return Temporary;
-	};
-	Matrix* P_Divide(Matrix* SomeMatrix) {
-
-		CheckSquareness();
-
-		return this->P_Multiply(SomeMatrix->P_Inverse(0.01));
 	};
 	Matrix* P_Add(Matrix* SomeMatrix) {
 
