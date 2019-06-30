@@ -10,6 +10,8 @@
 #include <tuple>
 #pragma once
 
+const int NUMBER_OF_CORES = 4;
+
 using namespace std;
 
 #pragma region
@@ -69,67 +71,9 @@ public:
 
 		int MaxCoordinateX = 0, MaxCoordinateY = 0;
 
-		for (int FirstIndex = 0; FirstIndex < Height; FirstIndex++) {
-
-			for (int SecondIndex = FirstIndex + 1; SecondIndex < Height; SecondIndex++) {
-
-				Fault += Temporary.GetMatrix()[FirstIndex][SecondIndex] * Temporary.GetMatrix()[FirstIndex][SecondIndex];
-			}
-		}
-
-		Fault = sqrt(Fault * 2);
-
-		for (; Fault > Precision;) {
-
-			MaxCoefficient = 0;
-
-			for (int FirstIndex = 0; FirstIndex < Height; FirstIndex++) {
-
-				for (int SecondIndex = FirstIndex + 1; SecondIndex < Length; SecondIndex++) {
-
-					if (Temporary.GetMatrix()[FirstIndex][SecondIndex] > 0 && Temporary.GetMatrix()[FirstIndex][SecondIndex] > MaxCoefficient) {
-
-						MaxCoefficient = Temporary.GetMatrix()[FirstIndex][SecondIndex];
-
-						MaxCoordinateY = SecondIndex;
-
-						MaxCoordinateX = FirstIndex;
-					}
-					else if (Temporary.GetMatrix()[FirstIndex][SecondIndex] < 0 && -Temporary.GetMatrix()[FirstIndex][SecondIndex] > MaxCoefficient) {
-
-						MaxCoefficient = -Temporary.GetMatrix()[FirstIndex][SecondIndex];
-
-						MaxCoordinateY = SecondIndex;
-
-						MaxCoordinateX = FirstIndex;
-					}
-				}
-			}
-
-			Matrix<Type> Rotation(Height, Length);
-
-			Rotation.UnitFilling();
-
-			if (Temporary.GetMatrix()[MaxCoordinateX][MaxCoordinateX] == Temporary.GetMatrix()[MaxCoordinateY][MaxCoordinateY]) {
-
-				Rotation.GetMatrix()[MaxCoordinateX][MaxCoordinateX] = Rotation.GetMatrix()[MaxCoordinateY][MaxCoordinateY] = Rotation.GetMatrix()[MaxCoordinateY][MaxCoordinateX] = sqrt(2.0) / 2.0;
-
-				Rotation.GetMatrix()[MaxCoordinateX][MaxCoordinateY] = -sqrt(2.0) / 2.0;
-			}
-			else {
-
-				AngleFi = 0.5 * atan((2.0 * Temporary.GetMatrix()[MaxCoordinateX][MaxCoordinateY]) / (Temporary.GetMatrix()[MaxCoordinateX][MaxCoordinateX] - Temporary.GetMatrix()[MaxCoordinateY][MaxCoordinateY]));
-
-				Rotation.GetMatrix()[MaxCoordinateX][MaxCoordinateX] = Rotation.GetMatrix()[MaxCoordinateY][MaxCoordinateY] = cos(AngleFi);
-
-				Rotation.GetMatrix()[MaxCoordinateX][MaxCoordinateY] = -sin(AngleFi);
-
-				Rotation.GetMatrix()[MaxCoordinateY][MaxCoordinateX] = sin(AngleFi);
-			}
-
-			Temporary = Rotation.Transpose().Multiply(Temporary).Multiply(Rotation);
-
-			Fault = 0.0;
+		#pragma omp parallel
+		{
+			#pragma omp for
 
 			for (int FirstIndex = 0; FirstIndex < Height; FirstIndex++) {
 
@@ -141,12 +85,76 @@ public:
 
 			Fault = sqrt(Fault * 2);
 
-			Diagonal *= Rotation;
-		}
+			do {
 
-		for (int Index = 0; Index < Height; Index++) {
+				MaxCoefficient = 0;
 
-			Solution.GetMatrix()[Index][0] = Temporary.GetMatrix()[Index][Index];
+				for (int FirstIndex = 0; FirstIndex < Height; FirstIndex++) {
+
+					for (int SecondIndex = FirstIndex + 1; SecondIndex < Length; SecondIndex++) {
+
+						if (Temporary.GetMatrix()[FirstIndex][SecondIndex] > 0 && Temporary.GetMatrix()[FirstIndex][SecondIndex] > MaxCoefficient) {
+
+							MaxCoefficient = Temporary.GetMatrix()[FirstIndex][SecondIndex];
+
+							MaxCoordinateY = SecondIndex;
+
+							MaxCoordinateX = FirstIndex;
+						}
+						else if (Temporary.GetMatrix()[FirstIndex][SecondIndex] < 0 && -Temporary.GetMatrix()[FirstIndex][SecondIndex] > MaxCoefficient) {
+
+							MaxCoefficient = -Temporary.GetMatrix()[FirstIndex][SecondIndex];
+
+							MaxCoordinateY = SecondIndex;
+
+							MaxCoordinateX = FirstIndex;
+						}
+					}
+				}
+
+				Matrix<Type> Rotation(Height, Length);
+
+				Rotation.UnitFilling();
+
+				if (Temporary.GetMatrix()[MaxCoordinateX][MaxCoordinateX] == Temporary.GetMatrix()[MaxCoordinateY][MaxCoordinateY]) {
+
+					Rotation.GetMatrix()[MaxCoordinateX][MaxCoordinateX] = Rotation.GetMatrix()[MaxCoordinateY][MaxCoordinateY] = Rotation.GetMatrix()[MaxCoordinateY][MaxCoordinateX] = sqrt(2.0) / 2.0;
+
+					Rotation.GetMatrix()[MaxCoordinateX][MaxCoordinateY] = -sqrt(2.0) / 2.0;
+				}
+				else {
+
+					AngleFi = 0.5 * atan((2.0 * Temporary.GetMatrix()[MaxCoordinateX][MaxCoordinateY]) / (Temporary.GetMatrix()[MaxCoordinateX][MaxCoordinateX] - Temporary.GetMatrix()[MaxCoordinateY][MaxCoordinateY]));
+
+					Rotation.GetMatrix()[MaxCoordinateX][MaxCoordinateX] = Rotation.GetMatrix()[MaxCoordinateY][MaxCoordinateY] = cos(AngleFi);
+
+					Rotation.GetMatrix()[MaxCoordinateX][MaxCoordinateY] = -sin(AngleFi);
+
+					Rotation.GetMatrix()[MaxCoordinateY][MaxCoordinateX] = sin(AngleFi);
+				}
+
+				Temporary = Rotation.Transpose().Multiply(Temporary).Multiply(Rotation);
+
+				Fault = 0.0;
+
+				for (int FirstIndex = 0; FirstIndex < Height; FirstIndex++) {
+
+					for (int SecondIndex = FirstIndex + 1; SecondIndex < Height; SecondIndex++) {
+
+						Fault += Temporary.GetMatrix()[FirstIndex][SecondIndex] * Temporary.GetMatrix()[FirstIndex][SecondIndex];
+					}
+				}
+
+				Fault = sqrt(Fault * 2);
+
+				Diagonal *= Rotation;
+
+			} while (Fault > Precision);
+
+			for (int Index = 0; Index < Height; Index++) {
+
+				Solution.GetMatrix()[Index][0] = Temporary.GetMatrix()[Index][Index];
+			}
 		}
 
 		return Solution;
@@ -165,30 +173,37 @@ public:
 
 		double Rate = 1;
 
-		do {
+		omp_set_num_threads(NUMBER_OF_CORES);
 
-			Matrix<Type> Vector = Solution;
+		#pragma omp parallel
+		{
+			#pragma omp for
 
-			for (int FirstIndex = 0; FirstIndex < Height; FirstIndex++) {
+			do {
 
-				double Coefficient = 0;
+				Matrix<Type> Vector = Solution;
 
-				for (int SecondIndex = 0; SecondIndex < FirstIndex; SecondIndex++) {
+				for (int FirstIndex = 0; FirstIndex < Height; FirstIndex++) {
 
-					Coefficient += Temporary.GetMatrix()[FirstIndex][SecondIndex] * Solution.GetMatrix()[SecondIndex][0];
+					double Coefficient = 0;
+
+					for (int SecondIndex = 0; SecondIndex < FirstIndex; SecondIndex++) {
+
+						Coefficient += Temporary.GetMatrix()[FirstIndex][SecondIndex] * Solution.GetMatrix()[SecondIndex][0];
+					}
+
+					for (int SecondIndex = FirstIndex + 1; SecondIndex < Length - 1; SecondIndex++) {
+
+						Coefficient += Temporary.GetMatrix()[FirstIndex][SecondIndex] * Vector.GetMatrix()[SecondIndex][0];
+					}
+
+					Solution.GetMatrix()[FirstIndex][0] = (SystemOfLinearEquations.GetMatrix()[FirstIndex][Length - 1] - Coefficient) / Temporary.GetMatrix()[FirstIndex][FirstIndex];
 				}
 
-				for (int SecondIndex = FirstIndex + 1; SecondIndex < Length - 1; SecondIndex++) {
+				Rate = Solution.Subtract(Vector).Rate();
 
-					Coefficient += Temporary.GetMatrix()[FirstIndex][SecondIndex] * Vector.GetMatrix()[SecondIndex][0];
-				}
-
-				Solution.GetMatrix()[FirstIndex][0] = (SystemOfLinearEquations.GetMatrix()[FirstIndex][Length - 1] - Coefficient) / Temporary.GetMatrix()[FirstIndex][FirstIndex];
-			}
-
-			Rate = Solution.Subtract(Vector).Rate();
-
-		} while (Rate > Precision);
+			} while (Rate > Precision);
+		}
 
 		return Solution;
 	};
@@ -240,38 +255,45 @@ public:
 
 		double Rate = 1;
 
-		do {
+		omp_set_num_threads(NUMBER_OF_CORES);
 
-			Matrix<Type> Vector(Height);
+		#pragma omp parallel
+		{
+			#pragma omp for
 
-			for (int FirstIndex = 0; FirstIndex < Height; FirstIndex++) {
+			do {
 
-				Vector.GetMatrix()[FirstIndex][0] = SystemOfLinearEquations.GetColumn(Length - 1).GetMatrix()[FirstIndex][0];
+				Matrix<Type> Vector(Height);
 
-				for (int SecondIndex = 0; SecondIndex < Length - 1; SecondIndex++) {
+				for (int FirstIndex = 0; FirstIndex < Height; FirstIndex++) {
 
-					if (FirstIndex != SecondIndex) {
+					Vector.GetMatrix()[FirstIndex][0] = SystemOfLinearEquations.GetColumn(Length - 1).GetMatrix()[FirstIndex][0];
 
-						Vector.GetMatrix()[FirstIndex][0] -= Temporary.GetMatrix()[FirstIndex][SecondIndex] * Solution.GetMatrix()[SecondIndex][0];
+					for (int SecondIndex = 0; SecondIndex < Length - 1; SecondIndex++) {
+
+						if (FirstIndex != SecondIndex) {
+
+							Vector.GetMatrix()[FirstIndex][0] -= Temporary.GetMatrix()[FirstIndex][SecondIndex] * Solution.GetMatrix()[SecondIndex][0];
+						}
 					}
+
+					Vector.GetMatrix()[FirstIndex][0] = CheckDivisionByZero(Vector.GetMatrix()[FirstIndex][0] / Temporary.GetMatrix()[FirstIndex][FirstIndex]);
 				}
 
-				Vector.GetMatrix()[FirstIndex][0] = CheckDivisionByZero(Vector.GetMatrix()[FirstIndex][0] / Temporary.GetMatrix()[FirstIndex][FirstIndex]);
-			}
+				Rate = fabs(Solution.GetMatrix()[0][0] - Vector.GetMatrix()[0][0]);
 
-			Rate = fabs(Solution.GetMatrix()[0][0] - Vector.GetMatrix()[0][0]);
+				for (int Index = 0; Index < Height; Index++) {
 
-			for (int Index = 0; Index < Height; Index++) {
+					if (fabs(Solution.GetMatrix()[Index][0] - Vector.GetMatrix()[Index][0]) > Rate) {
 
-				if (fabs(Solution.GetMatrix()[Index][0] - Vector.GetMatrix()[Index][0]) > Rate) {
+						Rate = fabs(Solution.GetMatrix()[Index][0] - Vector.GetMatrix()[Index][0]);
+					}
 
-					Rate = fabs(Solution.GetMatrix()[Index][0] - Vector.GetMatrix()[Index][0]);
+					Solution.GetMatrix()[Index][0] = Vector.GetMatrix()[Index][0];
 				}
 
-				Solution.GetMatrix()[Index][0] = Vector.GetMatrix()[Index][0];
-			}
-
-		} while (Rate > Precision);
+			} while (Rate > Precision);
+		}
 
 		return Solution;
 	};
@@ -287,41 +309,48 @@ public:
 
 		Matrix<Type> Solution(Height);
 
-		for (int FirstIndex = 1; FirstIndex < Height; FirstIndex++) {
+		omp_set_num_threads(NUMBER_OF_CORES);
 
-			for (int SecondIndex = FirstIndex; SecondIndex < Height; SecondIndex++) {
+		#pragma omp parallel
+		{
+			#pragma omp for
 
-				double Coefficient = CheckDivisionByZero(Temporary.GetMatrix()[SecondIndex][FirstIndex - 1] / Temporary.GetMatrix()[FirstIndex - 1][FirstIndex - 1]);
+			for (int FirstIndex = 1; FirstIndex < Height; FirstIndex++) {
 
-				if (Coefficient != 0) {
+				for (int SecondIndex = FirstIndex; SecondIndex < Height; SecondIndex++) {
 
-					for (int AuxiliaryIndex = 0; AuxiliaryIndex < Length; AuxiliaryIndex++) {
+					double Coefficient = CheckDivisionByZero(Temporary.GetMatrix()[SecondIndex][FirstIndex - 1] / Temporary.GetMatrix()[FirstIndex - 1][FirstIndex - 1]);
 
-						Temporary.GetMatrix()[SecondIndex][AuxiliaryIndex] -= Temporary.GetMatrix()[FirstIndex - 1][AuxiliaryIndex] * Coefficient;
+					if (Coefficient != 0) {
+
+						for (int AuxiliaryIndex = 0; AuxiliaryIndex < Length; AuxiliaryIndex++) {
+
+							Temporary.GetMatrix()[SecondIndex][AuxiliaryIndex] -= Temporary.GetMatrix()[FirstIndex - 1][AuxiliaryIndex] * Coefficient;
+						}
 					}
 				}
 			}
-		}
 
-		for (int FirstIndex = Height - 1; FirstIndex >= 0; FirstIndex--) {
+			for (int FirstIndex = Height - 1; FirstIndex >= 0; FirstIndex--) {
 
-			for (int SecondIndex = FirstIndex; SecondIndex > 0; SecondIndex--) {
+				for (int SecondIndex = FirstIndex; SecondIndex > 0; SecondIndex--) {
 
-				double Coefficient = CheckDivisionByZero(Temporary.GetMatrix()[SecondIndex - 1][FirstIndex] / Temporary.GetMatrix()[FirstIndex][FirstIndex]);
+					double Coefficient = CheckDivisionByZero(Temporary.GetMatrix()[SecondIndex - 1][FirstIndex] / Temporary.GetMatrix()[FirstIndex][FirstIndex]);
 
-				if (Coefficient != 0) {
+					if (Coefficient != 0) {
 
-					for (int AuxiliaryIndex = Length - 1; AuxiliaryIndex >= FirstIndex; AuxiliaryIndex--) {
+						for (int AuxiliaryIndex = Length - 1; AuxiliaryIndex >= FirstIndex; AuxiliaryIndex--) {
 
-						Temporary.GetMatrix()[SecondIndex - 1][AuxiliaryIndex] -= Temporary.GetMatrix()[FirstIndex][AuxiliaryIndex] * Coefficient;
+							Temporary.GetMatrix()[SecondIndex - 1][AuxiliaryIndex] -= Temporary.GetMatrix()[FirstIndex][AuxiliaryIndex] * Coefficient;
+						}
 					}
 				}
 			}
-		}
 
-		for (int Index = 0; Index < Height; Index++) {
+			for (int Index = 0; Index < Height; Index++) {
 
-			Solution.GetMatrix()[Index][0] = CheckDivisionByZero(Temporary.GetMatrix()[Index][Length - 1] / Temporary.GetMatrix()[Index][Index]);
+				Solution.GetMatrix()[Index][0] = CheckDivisionByZero(Temporary.GetMatrix()[Index][Length - 1] / Temporary.GetMatrix()[Index][Index]);
+			}
 		}
 
 		return Solution;
@@ -381,29 +410,34 @@ public:
 
 		Matrix<Type> Solution(Height);
 
-		for (int FirstIndex = 1; FirstIndex < Height; FirstIndex++) {
+		#pragma omp parallel
+		{
+			#pragma omp for
 
-			for (int SecondIndex = FirstIndex; SecondIndex < Height; SecondIndex++) {
+			for (int FirstIndex = 1; FirstIndex < Height; FirstIndex++) {
 
-				double Coefficient = CheckDivisionByZero(Temporary.GetMatrix()[SecondIndex][FirstIndex - 1] / Temporary.GetMatrix()[FirstIndex - 1][FirstIndex - 1]);
+				for (int SecondIndex = FirstIndex; SecondIndex < Height; SecondIndex++) {
 
-				if (Coefficient != 0) {
+					double Coefficient = CheckDivisionByZero(Temporary.GetMatrix()[SecondIndex][FirstIndex - 1] / Temporary.GetMatrix()[FirstIndex - 1][FirstIndex - 1]);
 
-					for (int AuxiliaryIndex = 0; AuxiliaryIndex < Length; AuxiliaryIndex++) {
+					if (Coefficient != 0) {
 
-						Temporary.GetMatrix()[SecondIndex][AuxiliaryIndex] -= Temporary.GetMatrix()[FirstIndex - 1][AuxiliaryIndex] * Coefficient;
+						for (int AuxiliaryIndex = 0; AuxiliaryIndex < Length; AuxiliaryIndex++) {
+
+							Temporary.GetMatrix()[SecondIndex][AuxiliaryIndex] -= Temporary.GetMatrix()[FirstIndex - 1][AuxiliaryIndex] * Coefficient;
+						}
 					}
 				}
 			}
-		}
 
-		for (int FirstIndex = Height - 1; FirstIndex >= 0; FirstIndex--) {
+			for (int FirstIndex = Height - 1; FirstIndex >= 0; FirstIndex--) {
 
-			Solution.GetMatrix()[FirstIndex][0] = CheckDivisionByZero(Temporary.GetMatrix()[FirstIndex][Length - 1] / Temporary.GetMatrix()[FirstIndex][FirstIndex]);
+				Solution.GetMatrix()[FirstIndex][0] = CheckDivisionByZero(Temporary.GetMatrix()[FirstIndex][Length - 1] / Temporary.GetMatrix()[FirstIndex][FirstIndex]);
 
-			for (int SecondIndex = Height - 1; SecondIndex > FirstIndex; SecondIndex--) {
+				for (int SecondIndex = Height - 1; SecondIndex > FirstIndex; SecondIndex--) {
 
-				Solution.GetMatrix()[FirstIndex][0] -= CheckDivisionByZero(Temporary.GetMatrix()[FirstIndex][SecondIndex] * Solution.GetMatrix()[SecondIndex][0] / Temporary.GetMatrix()[FirstIndex][FirstIndex]);
+					Solution.GetMatrix()[FirstIndex][0] -= CheckDivisionByZero(Temporary.GetMatrix()[FirstIndex][SecondIndex] * Solution.GetMatrix()[SecondIndex][0] / Temporary.GetMatrix()[FirstIndex][FirstIndex]);
+				}
 			}
 		}
 
@@ -519,13 +553,20 @@ public:
 
 		Type** Temporary = new Type*[Height];
 
-		for (int FirstIndex = 0; FirstIndex < Height; FirstIndex++) {
+		omp_set_num_threads(NUMBER_OF_CORES);
 
-			Temporary[FirstIndex] = new Type[Length];
+		#pragma omp parallel
+		{
+			#pragma omp for
 
-			for (int SecondIndex = 0; SecondIndex < Length; SecondIndex++) {
+			for (int FirstIndex = 0; FirstIndex < Height; FirstIndex++) {
 
-				Temporary[FirstIndex][SecondIndex] = SomeMatrix.InnerMatrix[FirstIndex][SecondIndex];
+				Temporary[FirstIndex] = new Type[Length];
+
+				for (int SecondIndex = 0; SecondIndex < Length; SecondIndex++) {
+
+					Temporary[FirstIndex][SecondIndex] = SomeMatrix.InnerMatrix[FirstIndex][SecondIndex];
+				}
 			}
 		}
 
@@ -540,11 +581,18 @@ public:
 
 		Matrix<Type> Temporary(Height, Length);
 
-		for (int FirstIndex = 0; FirstIndex < Height; FirstIndex++) {
+		omp_set_num_threads(NUMBER_OF_CORES);
 
-			for (int SecondIndex = 0; SecondIndex < Length; SecondIndex++) {
+		#pragma omp parallel
+		{
+			#pragma omp for
 
-				Temporary.InnerMatrix[FirstIndex][SecondIndex] = SomeMatrix[FirstIndex][SecondIndex];
+			for (int FirstIndex = 0; FirstIndex < Height; FirstIndex++) {
+
+				for (int SecondIndex = 0; SecondIndex < Length; SecondIndex++) {
+
+					Temporary.InnerMatrix[FirstIndex][SecondIndex] = SomeMatrix[FirstIndex][SecondIndex];
+				}
 			}
 		}
 
@@ -565,7 +613,7 @@ public:
 
 		Matrix<Type> Temporary(Height, Length);
 
-		omp_set_num_threads(4);
+		omp_set_num_threads(NUMBER_OF_CORES);
 
 		#pragma omp parallel
 		{
@@ -598,7 +646,7 @@ public:
 
 		Type* ThatColumn = new Type[ThatHeight];
 
-		omp_set_num_threads(4);
+		omp_set_num_threads(NUMBER_OF_CORES);
 
 		#pragma omp parallel
 		{
@@ -641,7 +689,7 @@ public:
 
 		Matrix<Type> Temporary(Height, Length);
 
-		omp_set_num_threads(4);
+		omp_set_num_threads(NUMBER_OF_CORES);
 
 		#pragma omp parallel
 		{
@@ -668,7 +716,7 @@ public:
 
 		Matrix<Type> Temporary(Height, Length);
 
-		omp_set_num_threads(4);
+		omp_set_num_threads(NUMBER_OF_CORES);
 
 		#pragma omp parallel
 		{
@@ -695,11 +743,18 @@ public:
 
 		Type Scalar = 0;
 
-		for (int FirstIndex = 0; FirstIndex < Height; FirstIndex++) {
+		omp_set_num_threads(NUMBER_OF_CORES);
 
-			for (int SecondIndex = 0; SecondIndex < Length; SecondIndex++) {
+		#pragma omp parallel
+		{
+			#pragma omp for
 
-				Scalar += InnerMatrix[FirstIndex][SecondIndex] * SomeMatrix.InnerMatrix[FirstIndex][SecondIndex];
+			for (int FirstIndex = 0; FirstIndex < Height; FirstIndex++) {
+
+				for (int SecondIndex = 0; SecondIndex < Length; SecondIndex++) {
+
+					Scalar += InnerMatrix[FirstIndex][SecondIndex] * SomeMatrix.InnerMatrix[FirstIndex][SecondIndex];
+				}
 			}
 		}
 
@@ -715,7 +770,7 @@ public:
 
 		Matrix<Type> Temporary(Height, Length);
 
-		omp_set_num_threads(4);
+		omp_set_num_threads(NUMBER_OF_CORES);
 
 		#pragma omp parallel
 		{
@@ -744,7 +799,7 @@ public:
 
 		double Value = 1;
 
-		omp_set_num_threads(4);
+		omp_set_num_threads(NUMBER_OF_CORES);
 
 		#pragma omp parallel
 		{
@@ -765,11 +820,11 @@ public:
 					}
 				}
 			}
-		}
 
-		for (int Index = 0; Index < Height; Index++) {
+			for (int Index = 0; Index < Height; Index++) {
 
-			Value *= Temporary.InnerMatrix[Index][Index];
+				Value *= Temporary.InnerMatrix[Index][Index];
+			}
 		}
 
 		return Value;
@@ -788,52 +843,59 @@ public:
 
 		Solution.UnitFilling();
 
-		for (int FirstIndex = 1; FirstIndex < Height; FirstIndex++) {
+		omp_set_num_threads(NUMBER_OF_CORES);
 
-			for (int SecondIndex = FirstIndex; SecondIndex < Height; SecondIndex++) {
+		#pragma omp parallel
+		{
+			#pragma omp for
 
-				double Coefficient = CheckDivisionByZero(Temporary.InnerMatrix[SecondIndex][FirstIndex - 1] / Temporary.InnerMatrix[FirstIndex - 1][FirstIndex - 1]);
+			for (int FirstIndex = 1; FirstIndex < Height; FirstIndex++) {
 
-				if (Coefficient != 0) {
+				for (int SecondIndex = FirstIndex; SecondIndex < Height; SecondIndex++) {
 
-					for (int AuxiliaryIndex = 0; AuxiliaryIndex < Length; AuxiliaryIndex++) {
+					double Coefficient = CheckDivisionByZero(Temporary.InnerMatrix[SecondIndex][FirstIndex - 1] / Temporary.InnerMatrix[FirstIndex - 1][FirstIndex - 1]);
 
-						Temporary.InnerMatrix[SecondIndex][AuxiliaryIndex] -= Temporary.InnerMatrix[FirstIndex - 1][AuxiliaryIndex] * Coefficient;
+					if (Coefficient != 0) {
 
-						Solution.InnerMatrix[SecondIndex][AuxiliaryIndex] -= Solution.InnerMatrix[FirstIndex - 1][AuxiliaryIndex] * Coefficient;
+						for (int AuxiliaryIndex = 0; AuxiliaryIndex < Length; AuxiliaryIndex++) {
+
+							Temporary.InnerMatrix[SecondIndex][AuxiliaryIndex] -= Temporary.InnerMatrix[FirstIndex - 1][AuxiliaryIndex] * Coefficient;
+
+							Solution.InnerMatrix[SecondIndex][AuxiliaryIndex] -= Solution.InnerMatrix[FirstIndex - 1][AuxiliaryIndex] * Coefficient;
+						}
 					}
 				}
 			}
-		}
 
-		for (int FirstIndex = 0; FirstIndex < Height; FirstIndex++) {
+			for (int FirstIndex = 0; FirstIndex < Height; FirstIndex++) {
 
-			double Coefficient = CheckDivisionByZero(1 / Temporary.InnerMatrix[FirstIndex][FirstIndex]);
+				double Coefficient = CheckDivisionByZero(1 / Temporary.InnerMatrix[FirstIndex][FirstIndex]);
 
-			for (int SecondIndex = 0; SecondIndex < Length; SecondIndex++) {
+				for (int SecondIndex = 0; SecondIndex < Length; SecondIndex++) {
 
-				if (Coefficient != 1) {
+					if (Coefficient != 1) {
 
-					Temporary.InnerMatrix[FirstIndex][SecondIndex] *= Coefficient;
+						Temporary.InnerMatrix[FirstIndex][SecondIndex] *= Coefficient;
 
-					Solution.InnerMatrix[FirstIndex][SecondIndex] *= Coefficient;
+						Solution.InnerMatrix[FirstIndex][SecondIndex] *= Coefficient;
+					}
 				}
 			}
-		}
 
-		for (int FirstIndex = Height - 1; FirstIndex >= 0; FirstIndex--) {
+			for (int FirstIndex = Height - 1; FirstIndex >= 0; FirstIndex--) {
 
-			for (int SecondIndex = FirstIndex; SecondIndex > 0; SecondIndex--) {
+				for (int SecondIndex = FirstIndex; SecondIndex > 0; SecondIndex--) {
 
-				double Coefficient = CheckDivisionByZero(Temporary.InnerMatrix[SecondIndex - 1][FirstIndex] / Temporary.InnerMatrix[FirstIndex][FirstIndex]);
+					double Coefficient = CheckDivisionByZero(Temporary.InnerMatrix[SecondIndex - 1][FirstIndex] / Temporary.InnerMatrix[FirstIndex][FirstIndex]);
 
-				if (Coefficient != 0) {
+					if (Coefficient != 0) {
 
-					for (int AuxiliaryIndex = Length - 1; AuxiliaryIndex >= 0; AuxiliaryIndex--) {
+						for (int AuxiliaryIndex = Length - 1; AuxiliaryIndex >= 0; AuxiliaryIndex--) {
 
-						Temporary.InnerMatrix[SecondIndex - 1][AuxiliaryIndex] -= Temporary.InnerMatrix[FirstIndex][AuxiliaryIndex] * Coefficient;
+							Temporary.InnerMatrix[SecondIndex - 1][AuxiliaryIndex] -= Temporary.InnerMatrix[FirstIndex][AuxiliaryIndex] * Coefficient;
 
-						Solution.InnerMatrix[SecondIndex - 1][AuxiliaryIndex] -= Solution.InnerMatrix[FirstIndex][AuxiliaryIndex] * Coefficient;
+							Solution.InnerMatrix[SecondIndex - 1][AuxiliaryIndex] -= Solution.InnerMatrix[FirstIndex][AuxiliaryIndex] * Coefficient;
+						}
 					}
 				}
 			}
@@ -852,19 +914,26 @@ public:
 
 		Matrix<Type> Temporary(*this);
 
-		if (SomeVector.Length == 1) {
+		omp_set_num_threads(NUMBER_OF_CORES);
 
-			for (int Index = 0; Index < Height; Index++) {
+		#pragma omp parallel
+		{
+			#pragma omp for
 
-				Temporary.InnerMatrix[Index][Position] = SomeVector.InnerMatrix[Index][0];
+			if (SomeVector.Length == 1) {
+
+				for (int Index = 0; Index < Height; Index++) {
+
+					Temporary.InnerMatrix[Index][Position] = SomeVector.InnerMatrix[Index][0];
+				}
+
+				return Temporary;
 			}
 
-			return Temporary;
-		}
+			for (int Index = 0; Index < Length; Index++) {
 
-		for (int Index = 0; Index < Length; Index++) {
-
-			Temporary.InnerMatrix[Position][Index] = SomeVector.InnerMatrix[0][Index];
+				Temporary.InnerMatrix[Position][Index] = SomeVector.InnerMatrix[0][Index];
+			}
 		}
 
 		return Temporary;
@@ -879,11 +948,18 @@ public:
 
 		Matrix<Type> Temporary(Height, Length);
 
-		for (int FirstIndex = StartY; FirstIndex <= EndY; FirstIndex++) {
+		omp_set_num_threads(NUMBER_OF_CORES);
 
-			for (int SecondIndex = StartX; SecondIndex <= EndX; SecondIndex++) {
+		#pragma omp parallel
+		{
+			#pragma omp for
 
-				Temporary.InnerMatrix[FirstIndex - StartY][SecondIndex - StartX] = InnerMatrix[FirstIndex][SecondIndex];
+			for (int FirstIndex = StartY; FirstIndex <= EndY; FirstIndex++) {
+
+				for (int SecondIndex = StartX; SecondIndex <= EndX; SecondIndex++) {
+
+					Temporary.InnerMatrix[FirstIndex - StartY][SecondIndex - StartX] = InnerMatrix[FirstIndex][SecondIndex];
+				}
 			}
 		}
 
@@ -967,11 +1043,18 @@ public:
 
 		Matrix<Type> Temporary(Height, Length);
 
-		for (int FirstIndex = 0; FirstIndex < Height; FirstIndex++) {
+		omp_set_num_threads(NUMBER_OF_CORES);
 
-			for (int SecondIndex = 0; SecondIndex < Length; SecondIndex++) {
+		#pragma omp parallel
+		{
+			#pragma omp for
 
-				Temporary.InnerMatrix[FirstIndex][SecondIndex] = Function(InnerMatrix[FirstIndex][SecondIndex]);
+			for (int FirstIndex = 0; FirstIndex < Height; FirstIndex++) {
+
+				for (int SecondIndex = 0; SecondIndex < Length; SecondIndex++) {
+
+					Temporary.InnerMatrix[FirstIndex][SecondIndex] = Function(InnerMatrix[FirstIndex][SecondIndex]);
+				}
 			}
 		}
 
@@ -989,34 +1072,41 @@ public:
 
 		Matrix<Type> Temporary(Height, Length);
 
-		int InnerHeight = 0;
+		omp_set_num_threads(NUMBER_OF_CORES);
 
-		for (int FirstIndex = 0; FirstIndex < ThisHeight; FirstIndex++) {
+		#pragma omp parallel
+		{
+			#pragma omp for
 
-			for (int SecondIndex = 0; SecondIndex < ThisLength; SecondIndex++) {
+			int InnerHeight = 0;
 
-				DeconvolutedMatrix[InnerHeight] = InnerMatrix[FirstIndex][SecondIndex];
+			for (int FirstIndex = 0; FirstIndex < ThisHeight; FirstIndex++) {
 
-				InnerHeight++;
-			}
-		}
+				for (int SecondIndex = 0; SecondIndex < ThisLength; SecondIndex++) {
 
-		InnerHeight = 0;
+					DeconvolutedMatrix[InnerHeight] = InnerMatrix[FirstIndex][SecondIndex];
 
-		int Counter = 0;
-
-		for (int Index = 0; Index < ThisLength * ThisHeight; Index++) {
-
-			if (Counter == Length) {
-
-				Counter = 0;
-
-				InnerHeight++;
+					InnerHeight++;
+				}
 			}
 
-			Temporary.InnerMatrix[InnerHeight][Counter] = DeconvolutedMatrix[Index];
+			InnerHeight = 0;
 
-			Counter++;
+			int Counter = 0;
+
+			for (int Index = 0; Index < ThisLength * ThisHeight; Index++) {
+
+				if (Counter == Length) {
+
+					Counter = 0;
+
+					InnerHeight++;
+				}
+
+				Temporary.InnerMatrix[InnerHeight][Counter] = DeconvolutedMatrix[Index];
+
+				Counter++;
+			}
 		}
 
 		delete[] DeconvolutedMatrix;
@@ -1044,11 +1134,18 @@ public:
 
 		const int Height = this->Height;
 
-		for (int FirstIndex = 0; FirstIndex < Height; FirstIndex++) {
+		omp_set_num_threads(NUMBER_OF_CORES);
 
-			for (int SecondIndex = 0; SecondIndex < Length; SecondIndex++) {
+		#pragma omp parallel
+		{
+			#pragma omp for
 
-				InnerMatrix[FirstIndex][SecondIndex] = Value;
+			for (int FirstIndex = 0; FirstIndex < Height; FirstIndex++) {
+
+				for (int SecondIndex = 0; SecondIndex < Length; SecondIndex++) {
+
+					InnerMatrix[FirstIndex][SecondIndex] = Value;
+				}
 			}
 		}
 
@@ -1064,11 +1161,18 @@ public:
 
 		srand(1 + rand() % 100);
 
-		for (int FirstIndex = 0; FirstIndex < Height; FirstIndex++) {
+		omp_set_num_threads(NUMBER_OF_CORES);
 
-			for (int SecondIndex = 0; SecondIndex < Length; SecondIndex++) {
+		#pragma omp parallel
+		{
+			#pragma omp for
 
-				InnerMatrix[FirstIndex][SecondIndex] = static_cast <float> (rand()) / static_cast <float> (RAND_MAX) - 0.5f;
+			for (int FirstIndex = 0; FirstIndex < Height; FirstIndex++) {
+
+				for (int SecondIndex = 0; SecondIndex < Length; SecondIndex++) {
+
+					InnerMatrix[FirstIndex][SecondIndex] = static_cast <float> (rand()) / static_cast <float> (RAND_MAX) - 0.5f;
+				}
 			}
 		}
 
@@ -1097,7 +1201,7 @@ public:
 
 		Matrix<Type> Temporary(Length, Height);
 
-		omp_set_num_threads(4);
+		omp_set_num_threads(NUMBER_OF_CORES);
 
 		#pragma omp parallel
 		{
@@ -1122,11 +1226,18 @@ public:
 
 		const int Height = this->Height;
 
-		for (int FirstIndex = 0; FirstIndex < Height; FirstIndex++) {
+		omp_set_num_threads(NUMBER_OF_CORES);
 
-			for (int SecondIndex = 0; SecondIndex < Length; SecondIndex++) {
+		#pragma omp parallel
+		{
+			#pragma omp for
 
-				InnerMatrix[FirstIndex][SecondIndex] = 0;
+			for (int FirstIndex = 0; FirstIndex < Height; FirstIndex++) {
+
+				for (int SecondIndex = 0; SecondIndex < Length; SecondIndex++) {
+
+					InnerMatrix[FirstIndex][SecondIndex] = 0;
+				}
 			}
 		}
 
@@ -1140,14 +1251,21 @@ public:
 
 		const int Height = this->Height;
 
-		for (int FirstIndex = 0; FirstIndex < Height; FirstIndex++) {
+		omp_set_num_threads(NUMBER_OF_CORES);
 
-			for (int SecondIndex = 0; SecondIndex < Length; SecondIndex++) {
+		#pragma omp parallel
+		{
+			#pragma omp for
 
-				cout << setw(12) << InnerMatrix[FirstIndex][SecondIndex];
+			for (int FirstIndex = 0; FirstIndex < Height; FirstIndex++) {
+
+				for (int SecondIndex = 0; SecondIndex < Length; SecondIndex++) {
+
+					cout << setw(12) << InnerMatrix[FirstIndex][SecondIndex];
+				}
+
+				cout << endl;
 			}
-
-			cout << endl;
 		}
 
 		cout << endl;
@@ -1257,35 +1375,42 @@ public:
 
 		Diagonal.UnitFilling();
 
-		for (int FirstIndex = 0; FirstIndex < Height; FirstIndex++) {
+		omp_set_num_threads(NUMBER_OF_CORES);
 
-			double PivotValue = 0;
+		#pragma omp parallel
+		{
+			#pragma omp for
 
-			int Pivot = -1;
+			for (int FirstIndex = 0; FirstIndex < Height; FirstIndex++) {
 
-			for (int SecondIndex = FirstIndex; SecondIndex < Height; SecondIndex++) {
+				double PivotValue = 0;
 
-				if (fabs(Temporary.InnerMatrix[SecondIndex][FirstIndex]) > PivotValue) {
+				int Pivot = -1;
 
-					PivotValue = fabs(Temporary.InnerMatrix[SecondIndex][FirstIndex]);
+				for (int SecondIndex = FirstIndex; SecondIndex < Height; SecondIndex++) {
 
-					Pivot = SecondIndex;
+					if (fabs(Temporary.InnerMatrix[SecondIndex][FirstIndex]) > PivotValue) {
+
+						PivotValue = fabs(Temporary.InnerMatrix[SecondIndex][FirstIndex]);
+
+						Pivot = SecondIndex;
+					}
 				}
-			}
 
-			if (PivotValue != 0) {
+				if (PivotValue != 0) {
 
-				Diagonal.SwapRows(Pivot, FirstIndex);
+					Diagonal.SwapRows(Pivot, FirstIndex);
 
-				Temporary.SwapRows(Pivot, FirstIndex);
+					Temporary.SwapRows(Pivot, FirstIndex);
 
-				for (int SecondIndex = FirstIndex + 1; SecondIndex < Height; SecondIndex++) {
+					for (int SecondIndex = FirstIndex + 1; SecondIndex < Height; SecondIndex++) {
 
-					Temporary.InnerMatrix[SecondIndex][FirstIndex] = CheckDivisionByZero(Temporary.InnerMatrix[SecondIndex][FirstIndex] / Temporary.InnerMatrix[FirstIndex][FirstIndex]);
+						Temporary.InnerMatrix[SecondIndex][FirstIndex] = CheckDivisionByZero(Temporary.InnerMatrix[SecondIndex][FirstIndex] / Temporary.InnerMatrix[FirstIndex][FirstIndex]);
 
-					for (int AuxiliaryIndex = FirstIndex + 1; AuxiliaryIndex < Length; AuxiliaryIndex++) {
+						for (int AuxiliaryIndex = FirstIndex + 1; AuxiliaryIndex < Length; AuxiliaryIndex++) {
 
-						Temporary.InnerMatrix[SecondIndex][AuxiliaryIndex] -= Temporary.InnerMatrix[SecondIndex][FirstIndex] * Temporary.InnerMatrix[FirstIndex][AuxiliaryIndex];
+							Temporary.InnerMatrix[SecondIndex][AuxiliaryIndex] -= Temporary.InnerMatrix[SecondIndex][FirstIndex] * Temporary.InnerMatrix[FirstIndex][AuxiliaryIndex];
+						}
 					}
 				}
 			}
@@ -1305,29 +1430,36 @@ public:
 
 		Matrix<Type> Temporary(*this);
 
-		for (int FirstIndex = 0; FirstIndex < Height; FirstIndex++) {
+		omp_set_num_threads(NUMBER_OF_CORES);
 
-			for (int SecondIndex = FirstIndex; SecondIndex < Length; SecondIndex++) {
+		#pragma omp parallel
+		{
+			#pragma omp for
 
-				Modified.InnerMatrix[SecondIndex][FirstIndex] = CheckDivisionByZero(Temporary.InnerMatrix[SecondIndex][FirstIndex] / Temporary.InnerMatrix[FirstIndex][FirstIndex]);
-			}
-		}
+			for (int FirstIndex = 0; FirstIndex < Height; FirstIndex++) {
 
-		for (int FirstIndex = 1; FirstIndex < Height; FirstIndex++) {
+				for (int SecondIndex = FirstIndex; SecondIndex < Length; SecondIndex++) {
 
-			for (int SecondIndex = FirstIndex - 1; SecondIndex < Height; SecondIndex++) {
-
-				for (int AuxiliaryIndex = SecondIndex; AuxiliaryIndex < Length; AuxiliaryIndex++) {
-
-					Modified.InnerMatrix[AuxiliaryIndex][SecondIndex] = CheckDivisionByZero(Temporary.InnerMatrix[AuxiliaryIndex][SecondIndex] / Temporary.InnerMatrix[SecondIndex][SecondIndex]);
+					Modified.InnerMatrix[SecondIndex][FirstIndex] = CheckDivisionByZero(Temporary.InnerMatrix[SecondIndex][FirstIndex] / Temporary.InnerMatrix[FirstIndex][FirstIndex]);
 				}
 			}
 
-			for (int SecondIndex = FirstIndex; SecondIndex < Height; SecondIndex++) {
+			for (int FirstIndex = 1; FirstIndex < Height; FirstIndex++) {
 
-				for (int AuxiliaryIndex = FirstIndex - 1; AuxiliaryIndex < Length; AuxiliaryIndex++) {
+				for (int SecondIndex = FirstIndex - 1; SecondIndex < Height; SecondIndex++) {
 
-					Temporary.InnerMatrix[SecondIndex][AuxiliaryIndex] -= Modified.InnerMatrix[SecondIndex][FirstIndex - 1] * Temporary.InnerMatrix[FirstIndex - 1][AuxiliaryIndex];
+					for (int AuxiliaryIndex = SecondIndex; AuxiliaryIndex < Length; AuxiliaryIndex++) {
+
+						Modified.InnerMatrix[AuxiliaryIndex][SecondIndex] = CheckDivisionByZero(Temporary.InnerMatrix[AuxiliaryIndex][SecondIndex] / Temporary.InnerMatrix[SecondIndex][SecondIndex]);
+					}
+				}
+
+				for (int SecondIndex = FirstIndex; SecondIndex < Height; SecondIndex++) {
+
+					for (int AuxiliaryIndex = FirstIndex - 1; AuxiliaryIndex < Length; AuxiliaryIndex++) {
+
+						Temporary.InnerMatrix[SecondIndex][AuxiliaryIndex] -= Modified.InnerMatrix[SecondIndex][FirstIndex - 1] * Temporary.InnerMatrix[FirstIndex - 1][AuxiliaryIndex];
+					}
 				}
 			}
 		}
@@ -1344,30 +1476,37 @@ public:
 
 		Matrix<Type> Temporary(Height, Length);
 
-		for (int FirstIndex = 0; FirstIndex < Height; FirstIndex++) {
+		omp_set_num_threads(NUMBER_OF_CORES);
 
-			double Coefficient = 0;
+		#pragma omp parallel
+		{
+			#pragma omp for
 
-			for (int SecondIndex = 0; SecondIndex < FirstIndex; SecondIndex++) {
+			for (int FirstIndex = 0; FirstIndex < Height; FirstIndex++) {
 
-				Coefficient = 0;
+				double Coefficient = 0;
 
-				for (int AuxiliaryIndex = 0; AuxiliaryIndex < SecondIndex; AuxiliaryIndex++) {
+				for (int SecondIndex = 0; SecondIndex < FirstIndex; SecondIndex++) {
 
-					Coefficient += Temporary.InnerMatrix[FirstIndex][AuxiliaryIndex] * Temporary.InnerMatrix[SecondIndex][AuxiliaryIndex];
+					Coefficient = 0;
+
+					for (int AuxiliaryIndex = 0; AuxiliaryIndex < SecondIndex; AuxiliaryIndex++) {
+
+						Coefficient += Temporary.InnerMatrix[FirstIndex][AuxiliaryIndex] * Temporary.InnerMatrix[SecondIndex][AuxiliaryIndex];
+					}
+
+					Temporary.InnerMatrix[FirstIndex][SecondIndex] = CheckDivisionByZero((InnerMatrix[FirstIndex][SecondIndex] - Coefficient) / Temporary.InnerMatrix[SecondIndex][SecondIndex]);
 				}
 
-				Temporary.InnerMatrix[FirstIndex][SecondIndex] = CheckDivisionByZero((InnerMatrix[FirstIndex][SecondIndex] - Coefficient) / Temporary.InnerMatrix[SecondIndex][SecondIndex]);
+				Coefficient = InnerMatrix[FirstIndex][FirstIndex];
+
+				for (int AuxiliaryIndex = 0; AuxiliaryIndex < FirstIndex; AuxiliaryIndex++) {
+
+					Coefficient -= Temporary.InnerMatrix[FirstIndex][AuxiliaryIndex] * Temporary.InnerMatrix[FirstIndex][AuxiliaryIndex];
+				}
+
+				Temporary.InnerMatrix[FirstIndex][FirstIndex] = sqrt(Coefficient);
 			}
-
-			Coefficient = InnerMatrix[FirstIndex][FirstIndex];
-
-			for (int AuxiliaryIndex = 0; AuxiliaryIndex < FirstIndex; AuxiliaryIndex++) {
-
-				Coefficient -= Temporary.InnerMatrix[FirstIndex][AuxiliaryIndex] * Temporary.InnerMatrix[FirstIndex][AuxiliaryIndex];
-			}
-
-			Temporary.InnerMatrix[FirstIndex][FirstIndex] = sqrt(Coefficient);
 		}
 
 		return Temporary;
@@ -1531,11 +1670,18 @@ public:
 
 		Type Value = 0;
 
-		for (int FirstIndex = 0; FirstIndex < Height; FirstIndex++) {
+		omp_set_num_threads(NUMBER_OF_CORES);
 
-			for (int SecondIndex = 0; SecondIndex < Length; SecondIndex++) {
+		#pragma omp parallel
+		{
+			#pragma omp for
 
-				Value += InnerMatrix[FirstIndex][SecondIndex];
+			for (int FirstIndex = 0; FirstIndex < Height; FirstIndex++) {
+
+				for (int SecondIndex = 0; SecondIndex < Length; SecondIndex++) {
+
+					Value += InnerMatrix[FirstIndex][SecondIndex];
+				}
 			}
 		}
 
@@ -1551,11 +1697,18 @@ public:
 
 		Type Value = 0;
 
-		for (int FirstIndex = 0; FirstIndex < Height; FirstIndex++) {
+		omp_set_num_threads(NUMBER_OF_CORES);
 
-			for (int SecondIndex = 0; SecondIndex < Length; SecondIndex++) {
+		#pragma omp parallel
+		{
+			#pragma omp for
 
-				Value += pow(InnerMatrix[FirstIndex][SecondIndex], 2);
+			for (int FirstIndex = 0; FirstIndex < Height; FirstIndex++) {
+
+				for (int SecondIndex = 0; SecondIndex < Length; SecondIndex++) {
+
+					Value += pow(InnerMatrix[FirstIndex][SecondIndex], 2);
+				}
 			}
 		}
 
@@ -1571,11 +1724,18 @@ public:
 
 		Type Value = 0;
 
-		for (int FirstIndex = 0; FirstIndex < Height; FirstIndex++) {
+		omp_set_num_threads(NUMBER_OF_CORES);
 
-			for (int SecondIndex = 0; SecondIndex < Length; SecondIndex++) {
+		#pragma omp parallel
+		{
+			#pragma omp for
 
-				Value = fmax(Value, InnerMatrix[FirstIndex][SecondIndex]);
+			for (int FirstIndex = 0; FirstIndex < Height; FirstIndex++) {
+
+				for (int SecondIndex = 0; SecondIndex < Length; SecondIndex++) {
+
+					Value = fmax(Value, InnerMatrix[FirstIndex][SecondIndex]);
+				}
 			}
 		}
 
