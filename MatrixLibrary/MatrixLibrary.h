@@ -8,26 +8,383 @@
 #include <string>
 #include <ctime>
 #include <tuple>
-#include <list>
-#pragma once
 
 using namespace std;
 
-const int MAX_CORES = omp_get_max_threads();
+#pragma region
+template<typename Real>
+class OMPComplexMatrix;
+template<typename Real>
+class OMPRealMatrix;
+#pragma endregion
 
-template<typename SomeType>
-class OMPMatrix {
+template<typename Real>
+class OMPRealMatrix {
 
 #pragma region
 private:
-	inline void CheckSummationAndSubtraction(const OMPMatrix& SomeMatrix) const {
+	inline OMPRealMatrix MultiplicationForLengthDividedBy_5(const OMPRealMatrix& SomeMatrix) const {
+
+		const int ThatLength = SomeMatrix.Length;
+
+		const int ThatHeight = SomeMatrix.Height;
+
+		const int Length = this->Length;
+
+		const int Height = this->Height;
+
+		OMPRealMatrix<Real> Temporary(Height, ThatLength);
+
+		omp_set_num_threads(NUMBER_OF_CORES);
+
+		#pragma omp parallel for schedule(static, NUMBER_OF_CORES)
+
+		for (int SecondIndex = 0; SecondIndex < ThatLength; SecondIndex += 5) {
+
+			Real* ThatColumn_4 = new Real[ThatHeight];
+
+			Real* ThatColumn_3 = new Real[ThatHeight];
+
+			Real* ThatColumn_2 = new Real[ThatHeight];
+
+			Real* ThatColumn_1 = new Real[ThatHeight];
+
+			Real* ThatColumn_0 = new Real[ThatHeight];
+
+			for (int AuxiliaryIndex = 0; AuxiliaryIndex < Length; AuxiliaryIndex++) {
+
+				ThatColumn_4[AuxiliaryIndex] = SomeMatrix.InnerMatrix[AuxiliaryIndex][4 + SecondIndex];
+
+				ThatColumn_3[AuxiliaryIndex] = SomeMatrix.InnerMatrix[AuxiliaryIndex][3 + SecondIndex];
+
+				ThatColumn_2[AuxiliaryIndex] = SomeMatrix.InnerMatrix[AuxiliaryIndex][2 + SecondIndex];
+
+				ThatColumn_1[AuxiliaryIndex] = SomeMatrix.InnerMatrix[AuxiliaryIndex][1 + SecondIndex];
+
+				ThatColumn_0[AuxiliaryIndex] = SomeMatrix.InnerMatrix[AuxiliaryIndex][0 + SecondIndex];
+			}
+
+			for (int FirstIndex = 0; FirstIndex < Height; FirstIndex++) {
+
+				Real* ThisRow = InnerMatrix[FirstIndex];
+
+				Real Summation_4 = 0;
+
+				Real Summation_3 = 0;
+
+				Real Summation_2 = 0;
+
+				Real Summation_1 = 0;
+
+				Real Summation_0 = 0;
+
+				for (int AuxiliaryIndex = 0; AuxiliaryIndex < Length; AuxiliaryIndex++) {
+
+					Summation_4 += ThisRow[AuxiliaryIndex] * ThatColumn_4[AuxiliaryIndex];
+
+					Summation_3 += ThisRow[AuxiliaryIndex] * ThatColumn_3[AuxiliaryIndex];
+
+					Summation_2 += ThisRow[AuxiliaryIndex] * ThatColumn_2[AuxiliaryIndex];
+
+					Summation_1 += ThisRow[AuxiliaryIndex] * ThatColumn_1[AuxiliaryIndex];
+
+					Summation_0 += ThisRow[AuxiliaryIndex] * ThatColumn_0[AuxiliaryIndex];
+				}
+
+				Temporary.InnerMatrix[FirstIndex][4 + SecondIndex] = Summation_4;
+
+				Temporary.InnerMatrix[FirstIndex][3 + SecondIndex] = Summation_3;
+
+				Temporary.InnerMatrix[FirstIndex][2 + SecondIndex] = Summation_2;
+
+				Temporary.InnerMatrix[FirstIndex][1 + SecondIndex] = Summation_1;
+
+				Temporary.InnerMatrix[FirstIndex][0 + SecondIndex] = Summation_0;
+			}
+
+			delete[] ThatColumn_4;
+
+			delete[] ThatColumn_3;
+
+			delete[] ThatColumn_2;
+
+			delete[] ThatColumn_1;
+
+			delete[] ThatColumn_0;
+		}
+
+		return Temporary;
+	};
+	inline OMPRealMatrix MultiplicationForLengthDividedBy_4(const OMPRealMatrix& SomeMatrix) const {
+
+		const int ThatLength = SomeMatrix.Length;
+
+		const int ThatHeight = SomeMatrix.Height;
+
+		const int Length = this->Length;
+
+		const int Height = this->Height;
+
+		OMPRealMatrix<Real> Temporary(Height, ThatLength);
+
+		omp_set_num_threads(NUMBER_OF_CORES);
+
+		#pragma omp parallel for schedule(static, NUMBER_OF_CORES)
+
+		for (int SecondIndex = 0; SecondIndex < ThatLength; SecondIndex += 4) {
+
+			Real* ThatColumn_3 = new Real[ThatHeight];
+
+			Real* ThatColumn_2 = new Real[ThatHeight];
+
+			Real* ThatColumn_1 = new Real[ThatHeight];
+
+			Real* ThatColumn_0 = new Real[ThatHeight];
+
+			for (int AuxiliaryIndex = 0; AuxiliaryIndex < Length; AuxiliaryIndex++) {
+
+				ThatColumn_3[AuxiliaryIndex] = SomeMatrix.InnerMatrix[AuxiliaryIndex][3 + SecondIndex];
+
+				ThatColumn_2[AuxiliaryIndex] = SomeMatrix.InnerMatrix[AuxiliaryIndex][2 + SecondIndex];
+
+				ThatColumn_1[AuxiliaryIndex] = SomeMatrix.InnerMatrix[AuxiliaryIndex][1 + SecondIndex];
+
+				ThatColumn_0[AuxiliaryIndex] = SomeMatrix.InnerMatrix[AuxiliaryIndex][0 + SecondIndex];
+			}
+
+			for (int FirstIndex = 0; FirstIndex < Height; FirstIndex++) {
+
+				Real* ThisRow = InnerMatrix[FirstIndex];
+
+				Real Summation_3 = 0;
+
+				Real Summation_2 = 0;
+
+				Real Summation_1 = 0;
+
+				Real Summation_0 = 0;
+
+				for (int AuxiliaryIndex = 0; AuxiliaryIndex < Length; AuxiliaryIndex++) {
+
+					Summation_3 += ThisRow[AuxiliaryIndex] * ThatColumn_3[AuxiliaryIndex];
+
+					Summation_2 += ThisRow[AuxiliaryIndex] * ThatColumn_2[AuxiliaryIndex];
+
+					Summation_1 += ThisRow[AuxiliaryIndex] * ThatColumn_1[AuxiliaryIndex];
+
+					Summation_0 += ThisRow[AuxiliaryIndex] * ThatColumn_0[AuxiliaryIndex];
+				}
+
+				Temporary.InnerMatrix[FirstIndex][3 + SecondIndex] = Summation_3;
+
+				Temporary.InnerMatrix[FirstIndex][2 + SecondIndex] = Summation_2;
+
+				Temporary.InnerMatrix[FirstIndex][1 + SecondIndex] = Summation_1;
+
+				Temporary.InnerMatrix[FirstIndex][0 + SecondIndex] = Summation_0;
+			}
+
+			delete[] ThatColumn_3;
+
+			delete[] ThatColumn_2;
+
+			delete[] ThatColumn_1;
+
+			delete[] ThatColumn_0;
+		}
+
+		return Temporary;
+	};
+	inline OMPRealMatrix MultiplicationForLengthDividedBy_3(const OMPRealMatrix& SomeMatrix) const {
+
+		const int ThatLength = SomeMatrix.Length;
+
+		const int ThatHeight = SomeMatrix.Height;
+
+		const int Length = this->Length;
+
+		const int Height = this->Height;
+
+		OMPRealMatrix<Real> Temporary(Height, ThatLength);
+
+		omp_set_num_threads(NUMBER_OF_CORES);
+
+		#pragma omp parallel for schedule(static, NUMBER_OF_CORES)
+
+		for (int SecondIndex = 0; SecondIndex < ThatLength; SecondIndex += 3) {
+
+			Real* ThatColumn_2 = new Real[ThatHeight];
+
+			Real* ThatColumn_1 = new Real[ThatHeight];
+
+			Real* ThatColumn_0 = new Real[ThatHeight];
+
+			for (int AuxiliaryIndex = 0; AuxiliaryIndex < Length; AuxiliaryIndex++) {
+
+				ThatColumn_2[AuxiliaryIndex] = SomeMatrix.InnerMatrix[AuxiliaryIndex][2 + SecondIndex];
+
+				ThatColumn_1[AuxiliaryIndex] = SomeMatrix.InnerMatrix[AuxiliaryIndex][1 + SecondIndex];
+
+				ThatColumn_0[AuxiliaryIndex] = SomeMatrix.InnerMatrix[AuxiliaryIndex][0 + SecondIndex];
+			}
+
+			for (int FirstIndex = 0; FirstIndex < Height; FirstIndex++) {
+
+				Real* ThisRow = InnerMatrix[FirstIndex];
+
+				Real Summation_2 = 0;
+
+				Real Summation_1 = 0;
+
+				Real Summation_0 = 0;
+
+				for (int AuxiliaryIndex = 0; AuxiliaryIndex < Length; AuxiliaryIndex++) {
+
+					Summation_2 += ThisRow[AuxiliaryIndex] * ThatColumn_2[AuxiliaryIndex];
+
+					Summation_1 += ThisRow[AuxiliaryIndex] * ThatColumn_1[AuxiliaryIndex];
+
+					Summation_0 += ThisRow[AuxiliaryIndex] * ThatColumn_0[AuxiliaryIndex];
+				}
+
+				Temporary.InnerMatrix[FirstIndex][2 + SecondIndex] = Summation_2;
+
+				Temporary.InnerMatrix[FirstIndex][1 + SecondIndex] = Summation_1;
+
+				Temporary.InnerMatrix[FirstIndex][0 + SecondIndex] = Summation_0;
+			}
+
+			delete[] ThatColumn_2;
+
+			delete[] ThatColumn_1;
+
+			delete[] ThatColumn_0;
+		}
+
+		return Temporary;
+	};
+	inline OMPRealMatrix MultiplicationForLengthDividedBy_2(const OMPRealMatrix& SomeMatrix) const {
+
+		const int ThatLength = SomeMatrix.Length;
+
+		const int ThatHeight = SomeMatrix.Height;
+
+		const int Length = this->Length;
+
+		const int Height = this->Height;
+
+		OMPRealMatrix<Real> Temporary(Height, ThatLength);
+
+		omp_set_num_threads(NUMBER_OF_CORES);
+
+		#pragma omp parallel for schedule(static, NUMBER_OF_CORES)
+
+		for (int SecondIndex = 0; SecondIndex < ThatLength; SecondIndex += 2) {
+
+			Real* ThatColumn_1 = new Real[ThatHeight];
+
+			Real* ThatColumn_0 = new Real[ThatHeight];
+
+			for (int AuxiliaryIndex = 0; AuxiliaryIndex < Length; AuxiliaryIndex++) {
+
+				ThatColumn_1[AuxiliaryIndex] = SomeMatrix.InnerMatrix[AuxiliaryIndex][1 + SecondIndex];
+
+				ThatColumn_0[AuxiliaryIndex] = SomeMatrix.InnerMatrix[AuxiliaryIndex][0 + SecondIndex];
+			}
+
+			for (int FirstIndex = 0; FirstIndex < Height; FirstIndex++) {
+
+				Real* ThisRow = InnerMatrix[FirstIndex];
+
+				Real Summation_1 = 0;
+
+				Real Summation_0 = 0;
+
+				for (int AuxiliaryIndex = 0; AuxiliaryIndex < Length; AuxiliaryIndex++) {
+
+					Summation_1 += ThisRow[AuxiliaryIndex] * ThatColumn_1[AuxiliaryIndex];
+
+					Summation_0 += ThisRow[AuxiliaryIndex] * ThatColumn_0[AuxiliaryIndex];
+				}
+
+				Temporary.InnerMatrix[FirstIndex][1 + SecondIndex] = Summation_1;
+
+				Temporary.InnerMatrix[FirstIndex][0 + SecondIndex] = Summation_0;
+			}
+
+			delete[] ThatColumn_1;
+
+			delete[] ThatColumn_0;
+		}
+
+		return Temporary;
+	};
+	inline OMPRealMatrix MultiplicationForLengthDividedBy_1(const OMPRealMatrix& SomeMatrix) const {
+
+		const int ThatLength = SomeMatrix.Length;
+
+		const int ThatHeight = SomeMatrix.Height;
+
+		const int Length = this->Length;
+
+		const int Height = this->Height;
+
+		OMPRealMatrix<Real> Temporary(Height, ThatLength);
+
+		omp_set_num_threads(NUMBER_OF_CORES);
+
+		#pragma omp parallel for schedule(static, NUMBER_OF_CORES)
+
+		for (int SecondIndex = 0; SecondIndex < ThatLength; SecondIndex++) {
+
+			Real* ThatColumn = new Real[ThatHeight];
+
+			for (int AuxiliaryIndex = 0; AuxiliaryIndex < Length; AuxiliaryIndex++) {
+
+				ThatColumn[AuxiliaryIndex] = SomeMatrix.InnerMatrix[AuxiliaryIndex][SecondIndex];
+			}
+
+			for (int FirstIndex = 0; FirstIndex < Height; FirstIndex++) {
+
+				Real* ThisRow = InnerMatrix[FirstIndex];
+
+				Real Summation = 0;
+
+				for (int AuxiliaryIndex = 0; AuxiliaryIndex < Length; AuxiliaryIndex++) {
+
+					Summation += ThisRow[AuxiliaryIndex] * ThatColumn[AuxiliaryIndex];
+				}
+
+				Temporary.InnerMatrix[FirstIndex][SecondIndex] = Summation;
+			}
+
+			delete[] ThatColumn;
+		}
+
+		return Temporary;
+	};
+
+	inline void CheckSummationAndSubtraction(const OMPRealMatrix& SomeMatrix) const {
 
 		if (Length != SomeMatrix.Length || Height != SomeMatrix.Height) {
 
 			throw "The length/height of the first matrix doesn't equal the length/height of the second matrix";
 		}
 	};
-	inline void CheckMultiplication(const OMPMatrix& SomeMatrix) const {
+	inline bool CheckPositiveDefinition(const OMPRealMatrix& SomeMatrix) const {
+
+		OMPRealMatrix<Real> Temporary(SomeMatrix.Height);
+
+		Temporary.Randomize();
+
+		if ((Temporary.Transpose().Multiply(SomeMatrix).Multiply(Temporary))[0][0] > 0) {
+
+			return true;
+		}
+
+		return false;
+	};
+	inline void CheckMultiplication(const OMPRealMatrix& SomeMatrix) const {
 
 		if (Length != SomeMatrix.Height) {
 
@@ -60,23 +417,24 @@ private:
 
 	inline void SwapRows(int FirstIndex, int SecondIndex) {
 
-		SomeType* Temporary = InnerMatrix[FirstIndex];
+		Real* Temporary = InnerMatrix[FirstIndex];
 
 		InnerMatrix[FirstIndex] = InnerMatrix[SecondIndex];
 
 		InnerMatrix[SecondIndex] = Temporary;
 	};
 
-	SomeType** InnerMatrix;
+	const int MAX_NUMBER = omp_get_max_threads();
 	int NUMBER_OF_CORES;
+	Real** InnerMatrix;
 	int Length;
 	int Height;
 #pragma endregion
 
 #pragma region
 public:
-	template<typename SomeType>
-	friend ostream& operator << (ostream& Stream, const OMPMatrix<SomeType>& SomeMatrix) {
+	template<typename Real>
+	friend ostream& operator << (ostream& Stream, const OMPRealMatrix<Real>& SomeMatrix) {
 
 		const int Length = SomeMatrix.Length;
 
@@ -94,8 +452,8 @@ public:
 
 		return Stream;
 	};
-	template<typename SomeType>
-	friend istream& operator >> (istream& Stream, const OMPMatrix<SomeType>& SomeMatrix) {
+	template<typename Real>
+	friend istream& operator >> (istream& Stream, const OMPRealMatrix<Real>& SomeMatrix) {
 
 		const int Length = SomeMatrix.Length;
 
@@ -112,7 +470,7 @@ public:
 		return Stream;
 	};
 
-	OMPMatrix Replace(int Position, const OMPMatrix& SomeVector) const {
+	OMPRealMatrix Replace(int Position, const OMPRealMatrix& SomeVector) const {
 
 		CheckParameters();
 
@@ -120,7 +478,7 @@ public:
 
 		const int Height = this->Height;
 
-		OMPMatrix<SomeType> Temporary(*this);
+		OMPRealMatrix<Real> Temporary(*this);
 
 		if (SomeVector.Length == 1) {
 
@@ -139,27 +497,7 @@ public:
 
 		return Temporary;
 	};
-	OMPMatrix UseFunction(SomeType(*Function)(SomeType)) const {
-
-		CheckParameters();
-
-		const int Length = this->Length;
-
-		const int Height = this->Height;
-
-		OMPMatrix<SomeType> Temporary(Height, Length);
-
-		for (int FirstIndex = 0; FirstIndex < Height; FirstIndex++) {
-
-			for (int SecondIndex = 0; SecondIndex < Length; SecondIndex++) {
-
-				Temporary.InnerMatrix[FirstIndex][SecondIndex] = Function(InnerMatrix[FirstIndex][SecondIndex]);
-			}
-		}
-
-		return Temporary;
-	};
-	OMPMatrix Cut(int StartX, int StartY, int EndX, int EndY) const {
+	OMPRealMatrix Cut(int StartX, int StartY, int EndX, int EndY) const {
 
 		CheckParameters();
 
@@ -167,7 +505,7 @@ public:
 
 		const int Length = (EndY - StartY) + 1;
 
-		OMPMatrix<SomeType> Temporary(Height, Length);
+		OMPRealMatrix<Real> Temporary(Height, Length);
 
 		for (int FirstIndex = StartY; FirstIndex < Height; FirstIndex++) {
 
@@ -179,7 +517,7 @@ public:
 
 		return Temporary;
 	};
-	OMPMatrix LoadFromFIle(string Path, char Delimiter) const {
+	OMPRealMatrix LoadFromFIle(string Path, char Delimiter) const {
 
 		ifstream Input(Path);
 
@@ -212,7 +550,7 @@ public:
 
 		Input.seekg(0, Input.beg);
 
-		OMPMatrix<SomeType> Temporary(Height, Length);
+		OMPRealMatrix<Real> Temporary(Height, Length);
 
 		Height = 0, Length = 0;
 
@@ -247,7 +585,82 @@ public:
 
 		return Temporary;
 	};
-	OMPMatrix Reshape(int Height, int Length) const {
+	OMPRealMatrix FillBand(int LowerSize, int UpperSize) const {
+
+		CheckSquareness();
+
+		const int Length = this->Length;
+
+		const int Height = this->Height;
+
+		for (int FirstIndex = 0; FirstIndex < Height; FirstIndex++) {
+
+			for (int SeconIndex = 0; SeconIndex <= UpperSize; SeconIndex++) {
+
+				if (FirstIndex + SeconIndex < Length) {
+
+					InnerMatrix[FirstIndex][FirstIndex + SeconIndex] = static_cast <float> (rand()) / static_cast <float> (RAND_MAX) - 0.5f;
+				}
+			}
+
+			for (int SeconIndex = 0; SeconIndex <= LowerSize; SeconIndex++) {
+
+				if (FirstIndex - SeconIndex >= 0) {
+
+					InnerMatrix[FirstIndex][FirstIndex - SeconIndex] = static_cast <float> (rand()) / static_cast <float> (RAND_MAX) - 0.5f;
+				}
+			}
+		}
+
+		return *this;
+	};
+	OMPRealMatrix UseFunction(Real(*Function)(Real)) const {
+
+		CheckParameters();
+
+		const int Length = this->Length;
+
+		const int Height = this->Height;
+
+		OMPRealMatrix<Real> Temporary(Height, Length);
+
+		for (int FirstIndex = 0; FirstIndex < Height; FirstIndex++) {
+
+			for (int SecondIndex = 0; SecondIndex < Length; SecondIndex++) {
+
+				Temporary.InnerMatrix[FirstIndex][SecondIndex] = Function(InnerMatrix[FirstIndex][SecondIndex]);
+			}
+		}
+
+		return Temporary;
+	};
+	OMPRealMatrix FillColumn(int Position, Real Value) const {
+
+		CheckParameters();
+
+		const int Height = this->Height;
+
+		for (int Index = 0; Index < Height; Index++) {
+
+			InnerMatrix[Index][Position] = Value;
+		}
+
+		return *this;
+	};
+	OMPRealMatrix FillRow(int Position, Real Value) const {
+
+		CheckParameters();
+
+		const int Height = this->Height;
+
+		for (int Index = 0; Index < Height; Index++) {
+
+			InnerMatrix[Position][Index] = Value;
+		}
+
+		return *this;
+	};
+	OMPRealMatrix Reshape(int Height, int Length) const {
 
 		CheckParameters();
 
@@ -255,9 +668,9 @@ public:
 
 		const int ThisHeight = this->Height;
 
-		SomeType* DeconvolutedMatrix = new SomeType[ThisLength * ThisHeight];
+		Real* DeconvolutedMatrix = new Real[ThisLength * ThisHeight];
 
-		OMPMatrix<SomeType> Temporary(Height, Length);
+		OMPRealMatrix<Real> Temporary(Height, Length);
 
 		int InnerHeight = 0;
 
@@ -265,7 +678,7 @@ public:
 
 			for (int SecondIndex = 0; SecondIndex < ThisLength; SecondIndex++) {
 
-				DeconvolutedMatrix[InnerHeight] = InnerMatrix[FirstIndex][SecondIndex];
+				(DeconvolutedMatrix)[InnerHeight] = InnerMatrix[FirstIndex][SecondIndex];
 
 				InnerHeight++;
 			}
@@ -284,7 +697,7 @@ public:
 				InnerHeight++;
 			}
 
-			Temporary.InnerMatrix[InnerHeight][Counter] = DeconvolutedMatrix[Index];
+			Temporary.InnerMatrix[InnerHeight][Counter] = (DeconvolutedMatrix)[Index];
 
 			Counter++;
 		}
@@ -293,20 +706,54 @@ public:
 
 		return Temporary;
 	};
-	OMPMatrix Exponentiate(int Power) const {
+	OMPRealMatrix FillMainDiagonal(Real Value) const {
+
+		CheckSquareness();
+
+		const int Height = this->Height;
+
+		for (int Index = 0; Index < Height; Index++) {
+
+			InnerMatrix[Index][Index] = Value;
+		}
+
+		return *this;
+	};
+	OMPRealMatrix FillSideDiagonal(Real Value) const {
+
+		CheckSquareness();
+
+		const int Height = this->Height;
+
+		for (int Index = 0; Index < Height; Index++) {
+
+			InnerMatrix[Index][Height - Index - 1] = Value;
+		}
+
+		return *this;
+
+	};
+	OMPRealMatrix FillSimmetrically() const {
 
 		CheckParameters();
 
-		OMPMatrix<SomeType> Temporary(*this);
+		const int Length = this->Length;
 
-		for (int Index = 1; Index < Power; Index++) {
+		const int Height = this->Height;
 
-			Temporary = Temporary.Multiply(*this);
+		srand(1 + rand() % 100);
+
+		for (int FirstIndex = 0; FirstIndex < Height; FirstIndex++) {
+
+			for (int SecondIndex = 0; SecondIndex < Length; SecondIndex++) {
+
+				InnerMatrix[FirstIndex][SecondIndex] = InnerMatrix[SecondIndex][FirstIndex] = static_cast <float> (rand()) / static_cast <float> (RAND_MAX) - 0.5f;
+			}
 		}
 
-		return Temporary;
+		return *this;
 	};
-	OMPMatrix Fill(SomeType Value) const {
+	OMPRealMatrix Fill(Real Value) const {
 
 		CheckParameters();
 
@@ -324,7 +771,7 @@ public:
 
 		return *this;
 	};
-	OMPMatrix Randomize() const {
+	OMPRealMatrix Randomize() const {
 
 		CheckParameters();
 
@@ -344,20 +791,7 @@ public:
 
 		return *this;
 	};
-	OMPMatrix UnitFilling() const {
-
-		CheckSquareness();
-
-		const int Height = this->Height;
-
-		for (int Index = 0; Index < Height; Index++) {
-
-			InnerMatrix[Index][Index] = 1;
-		}
-
-		return *this;
-	};
-	OMPMatrix Clear() const {
+	OMPRealMatrix Clear() const {
 
 		CheckParameters();
 
@@ -375,7 +809,7 @@ public:
 
 		return *this;
 	};
-	OMPMatrix Print() const {
+	OMPRealMatrix Print() const {
 
 		CheckParameters();
 
@@ -398,42 +832,11 @@ public:
 		return *this;
 	};
 
-	OMPMatrix operator * (const OMPMatrix& SomeMatrix) const {
-
-		return this->Multiply(SomeMatrix);
-	};
-	OMPMatrix operator + (const OMPMatrix& SomeMatrix) const {
-
-		return this->Add(SomeMatrix);
-	};
-	OMPMatrix operator / (const OMPMatrix& SomeMatrix) const {
-
-		return this->Divide(SomeMatrix);
-	};
-	OMPMatrix operator - (const OMPMatrix& SomeMatrix) const {
-
-		return this->Subtract(SomeMatrix);
-	};
-	OMPMatrix operator * (const SomeType Coefficient) const {
-
-		return this->Multiply(Coefficient);
-	};
-	OMPMatrix operator ^ (const int Power) const {
-
-		return this->Exponentiate(Power);
-	};
-	OMPMatrix operator ~ () {
-
-		return this->Transpose();
-	};
-	
-	OMPMatrix(int Height, int Length, long NUMBER_OF_CORES) : Length(Length), Height(Height), NUMBER_OF_CORES(NUMBER_OF_CORES) {
+	OMPRealMatrix(vector<vector<Real>> SomeMatrix, long NUMBER_OF_CORES) : Length(size(SomeMatrix[0])), Height(size(SomeMatrix)), NUMBER_OF_CORES(NUMBER_OF_CORES) {
 
 		const int ThisLength = Length;
 
 		const int ThisHeight = Height;
-
-		InnerMatrix = new SomeType*[ThisHeight];
 
 		omp_set_num_threads(NUMBER_OF_CORES);
 
@@ -441,7 +844,29 @@ public:
 
 		for (int FirstIndex = 0; FirstIndex < ThisHeight; FirstIndex++) {
 
-			InnerMatrix[FirstIndex] = new SomeType[ThisLength];
+			InnerMatrix[FirstIndex] = new Real[ThisLength];
+
+			for (int SecondIndex = 0; SecondIndex < ThisLength; SecondIndex++) {
+
+				InnerMatrix[FirstIndex][SecondIndex] = SomeMatrix[FirstIndex][SecondIndex];
+			}
+		}
+	};
+	OMPRealMatrix(int Height, int Length, long NUMBER_OF_CORES) : Length(Length), Height(Height), NUMBER_OF_CORES(NUMBER_OF_CORES) {
+
+		const int ThisLength = Length;
+
+		const int ThisHeight = Height;
+
+		InnerMatrix = new Real*[ThisHeight];
+
+		omp_set_num_threads(NUMBER_OF_CORES);
+
+		#pragma omp parallel for schedule(static, NUMBER_OF_CORES)
+
+		for (int FirstIndex = 0; FirstIndex < ThisHeight; FirstIndex++) {
+
+			InnerMatrix[FirstIndex] = new Real[ThisLength];
 
 			for (int SecondIndex = 0; SecondIndex < ThisLength; SecondIndex++) {
 
@@ -449,30 +874,11 @@ public:
 			}
 		}
 	};
-	OMPMatrix(int Height, long NUMBER_OF_CORES) : Length(1), Height(Height), NUMBER_OF_CORES(NUMBER_OF_CORES) {
-
-		const int ThisHeight = Height;
-
-		InnerMatrix = new SomeType*[ThisHeight];
-
-		omp_set_num_threads(NUMBER_OF_CORES);
-
-		#pragma omp parallel for schedule(static, NUMBER_OF_CORES)
-
-		for (int Index = 0; Index < ThisHeight; Index++) {
-
-			InnerMatrix[Index] = new SomeType[1];
-
-			InnerMatrix[Index][0] = 0;
-		}
-	};
-	OMPMatrix(const OMPMatrix& SomeMatrix) : Length(SomeMatrix.Length), Height(SomeMatrix.Height), NUMBER_OF_CORES(SomeMatrix.NUMBER_OF_CORES) {
+	OMPRealMatrix(Real** SomeMatrix, long NUMBER_OF_CORES) : Length(_msize(SomeMatrix[0]) / sizeof(SomeMatrix[0][0])), Height(_msize(SomeMatrix) / sizeof(SomeMatrix[0])), NUMBER_OF_CORES(NUMBER_OF_CORES) {
 
 		const int ThisLength = Length;
 
 		const int ThisHeight = Height;
-
-		InnerMatrix = new SomeType*[ThisHeight];
 
 		omp_set_num_threads(NUMBER_OF_CORES);
 
@@ -480,7 +886,7 @@ public:
 
 		for (int FirstIndex = 0; FirstIndex < ThisHeight; FirstIndex++) {
 
-			InnerMatrix[FirstIndex] = new SomeType[ThisLength];
+			InnerMatrix[FirstIndex] = new Real[ThisLength];
 
 			for (int SecondIndex = 0; SecondIndex < ThisLength; SecondIndex++) {
 
@@ -488,33 +894,11 @@ public:
 			}
 		}
 	};
-	OMPMatrix(int Height, int Length) : Length(Length), Height(Height), NUMBER_OF_CORES(MAX_CORES) {
-
-		const int ThisLength = Length;
+	OMPRealMatrix(int Height, long NUMBER_OF_CORES) : Length(1), Height(Height), NUMBER_OF_CORES(NUMBER_OF_CORES) {
 
 		const int ThisHeight = Height;
 
-		InnerMatrix = new SomeType*[ThisHeight];
-
-		omp_set_num_threads(NUMBER_OF_CORES);
-
-		#pragma omp parallel for schedule(static, NUMBER_OF_CORES)
-
-		for (int FirstIndex = 0; FirstIndex < ThisHeight; FirstIndex++) {
-
-			InnerMatrix[FirstIndex] = new SomeType[ThisLength];
-
-			for (int SecondIndex = 0; SecondIndex < ThisLength; SecondIndex++) {
-
-				InnerMatrix[FirstIndex][SecondIndex] = 0;
-			}
-		}
-	};
-	OMPMatrix(int Height) : Length(1), Height(Height), NUMBER_OF_CORES(MAX_CORES) {
-
-		const int ThisHeight = Height;
-
-		InnerMatrix = new SomeType*[ThisHeight];
+		InnerMatrix = new Real*[ThisHeight];
 
 		omp_set_num_threads(NUMBER_OF_CORES);
 
@@ -522,12 +906,113 @@ public:
 
 		for (int Index = 0; Index < ThisHeight; Index++) {
 
-			InnerMatrix[Index] = new SomeType[1];
+			InnerMatrix[Index] = new Real[1];
 
 			InnerMatrix[Index][0] = 0;
 		}
 	};
-	~OMPMatrix() {
+	OMPRealMatrix(const OMPRealMatrix& SomeMatrix) : Length(SomeMatrix.Length), Height(SomeMatrix.Height), NUMBER_OF_CORES(SomeMatrix.NUMBER_OF_CORES) {
+
+		const int ThisLength = Length;
+
+		const int ThisHeight = Height;
+
+		InnerMatrix = new Real*[ThisHeight];
+
+		omp_set_num_threads(NUMBER_OF_CORES);
+
+		#pragma omp parallel for schedule(static, NUMBER_OF_CORES)
+
+		for (int FirstIndex = 0; FirstIndex < ThisHeight; FirstIndex++) {
+
+			InnerMatrix[FirstIndex] = new Real[ThisLength];
+
+			for (int SecondIndex = 0; SecondIndex < ThisLength; SecondIndex++) {
+
+				InnerMatrix[FirstIndex][SecondIndex] = SomeMatrix.InnerMatrix[FirstIndex][SecondIndex];
+			}
+		}
+	};
+	OMPRealMatrix(vector<vector<Real>> SomeMatrix) : Length(size(SomeMatrix[0])), Height(size(SomeMatrix)), NUMBER_OF_CORES(MAX_NUMBER) {
+
+		const int ThisLength = Length;
+
+		const int ThisHeight = Height;
+
+		omp_set_num_threads(NUMBER_OF_CORES);
+
+		#pragma omp parallel for schedule(static, NUMBER_OF_CORES)
+
+		for (int FirstIndex = 0; FirstIndex < ThisHeight; FirstIndex++) {
+
+			InnerMatrix[FirstIndex] = new Real[ThisLength];
+
+			for (int SecondIndex = 0; SecondIndex < ThisLength; SecondIndex++) {
+
+				InnerMatrix[FirstIndex][SecondIndex] = SomeMatrix[FirstIndex][SecondIndex];
+			}
+		}
+	};
+	OMPRealMatrix(int Height, int Length) : Length(Length), Height(Height), NUMBER_OF_CORES(MAX_NUMBER) {
+
+		const int ThisLength = Length;
+
+		const int ThisHeight = Height;
+
+		InnerMatrix = new Real*[ThisHeight];
+
+		omp_set_num_threads(NUMBER_OF_CORES);
+
+		#pragma omp parallel for schedule(static, NUMBER_OF_CORES)
+
+		for (int FirstIndex = 0; FirstIndex < ThisHeight; FirstIndex++) {
+
+			InnerMatrix[FirstIndex] = new Real[ThisLength];
+
+			for (int SecondIndex = 0; SecondIndex < ThisLength; SecondIndex++) {
+
+				InnerMatrix[FirstIndex][SecondIndex] = 0;
+			}
+		}
+	};
+	OMPRealMatrix(Real** SomeMatrix) : Length(_msize(SomeMatrix[0]) / sizeof(SomeMatrix[0][0])), Height(_msize(SomeMatrix) / sizeof(SomeMatrix[0])), NUMBER_OF_CORES(MAX_NUMBER) {
+
+		const int ThisLength = Length;
+
+		const int ThisHeight = Height;
+
+		omp_set_num_threads(NUMBER_OF_CORES);
+
+		#pragma omp parallel for schedule(static, NUMBER_OF_CORES)
+
+		for (int FirstIndex = 0; FirstIndex < ThisHeight; FirstIndex++) {
+
+			InnerMatrix[FirstIndex] = new Real[ThisLength];
+
+			for (int SecondIndex = 0; SecondIndex < ThisLength; SecondIndex++) {
+
+				InnerMatrix[FirstIndex][SecondIndex] = SomeMatrix.InnerMatrix[FirstIndex][SecondIndex];
+			}
+		}
+	};
+	OMPRealMatrix(int Height) : Length(1), Height(Height), NUMBER_OF_CORES(MAX_NUMBER) {
+
+		const int ThisHeight = Height;
+
+		InnerMatrix = new Real*[ThisHeight];
+
+		omp_set_num_threads(NUMBER_OF_CORES);
+
+		#pragma omp parallel for schedule(static, NUMBER_OF_CORES)
+
+		for (int Index = 0; Index < ThisHeight; Index++) {
+
+			InnerMatrix[Index] = new Real[1];
+
+			InnerMatrix[Index][0] = 0;
+		}
+	};
+	~OMPRealMatrix() {
 
 		const int ThisHeight = Height;
 
@@ -542,12 +1027,41 @@ public:
 
 		delete[] InnerMatrix;
 	};
-	OMPMatrix() : Length(0), Height(0) {
+	OMPRealMatrix() {
 
 		InnerMatrix = nullptr;
 	};
 
-	OMPMatrix Subtract(const OMPMatrix& SomeMatrix) const {
+	OMPRealMatrix operator * (const OMPRealMatrix& SomeMatrix) const {
+
+		return this->Multiply(SomeMatrix);
+	};
+	OMPRealMatrix operator + (const OMPRealMatrix& SomeMatrix) const {
+
+		return this->Add(SomeMatrix);
+	};
+	OMPRealMatrix operator / (const OMPRealMatrix& SomeMatrix) const {
+
+		return this->Divide(SomeMatrix);
+	};
+	OMPRealMatrix operator - (const OMPRealMatrix& SomeMatrix) const {
+
+		return this->Subtract(SomeMatrix);
+	};
+	OMPRealMatrix operator * (const Real Coefficient) const {
+
+		return this->Multiply(Coefficient);
+	};
+	OMPRealMatrix operator ^ (const int Power) const {
+
+		return this->Exponentiate(Power);
+	};
+	OMPRealMatrix operator ~ () {
+
+		return this->Transpose();
+	};	
+
+	OMPRealMatrix Subtract(const OMPRealMatrix& SomeMatrix) const {
 
 		CheckSummationAndSubtraction(SomeMatrix);
 
@@ -555,7 +1069,7 @@ public:
 
 		const int Height = this->Height;
 
-		OMPMatrix<SomeType> Temporary(Height, Length);
+		OMPRealMatrix<Real> Temporary(Height, Length);
 
 		omp_set_num_threads(NUMBER_OF_CORES);
 
@@ -571,53 +1085,32 @@ public:
 
 		return Temporary;
 	};
-	OMPMatrix Multiply(const OMPMatrix& SomeMatrix) const {
+	OMPRealMatrix Multiply(const OMPRealMatrix& SomeMatrix) const {
 
 		CheckMultiplication(SomeMatrix);
 
-		const int ThatLength = SomeMatrix.Length;
+		const int Length = SomeMatrix.Length;
 
-		const int ThatHeight = SomeMatrix.Height;
+		if (Length % 5 == 0) {
 
-		const int ThisLength = Length;
+			return MultiplicationForLengthDividedBy_5(SomeMatrix);
+		}
+		if (Length % 4 == 0) {
 
-		const int ThisHeight = Height;
+			return MultiplicationForLengthDividedBy_4(SomeMatrix);
+		}
+		if (Length % 3 == 0) {
 
-		OMPMatrix<SomeType> Temporary(ThisHeight, ThatLength);
+			return MultiplicationForLengthDividedBy_3(SomeMatrix);
+		}
+		if (Length % 2 == 0) {
 
-		SomeType* ThatColumn = new SomeType[ThatHeight];
-
-		omp_set_num_threads(NUMBER_OF_CORES);
-
-		#pragma omp parallel for schedule(static, NUMBER_OF_CORES)
-
-		for (int SecondIndex = 0; SecondIndex < ThatLength; SecondIndex++) {
-
-			for (int AuxiliaryIndex = 0; AuxiliaryIndex < ThisLength; AuxiliaryIndex++) {
-
-				ThatColumn[AuxiliaryIndex] = SomeMatrix.InnerMatrix[AuxiliaryIndex][SecondIndex];
-			}
-
-			for (int FirstIndex = 0; FirstIndex < ThisHeight; FirstIndex++) {
-
-				SomeType* ThisRow = InnerMatrix[FirstIndex];
-
-				SomeType Summation = 0;
-
-				for (int AuxiliaryIndex = 0; AuxiliaryIndex < ThisLength; AuxiliaryIndex++) {
-
-					Summation += ThisRow[AuxiliaryIndex] * ThatColumn[AuxiliaryIndex];
-				}
-
-				Temporary.InnerMatrix[FirstIndex][SecondIndex] = Summation;
-			}
+			return MultiplicationForLengthDividedBy_2(SomeMatrix);
 		}
 
-		delete[] ThatColumn;
-
-		return Temporary;
+		return MultiplicationForLengthDividedBy_1(SomeMatrix);
 	};
-	OMPMatrix Product(const OMPMatrix& SomeMatrix) const {
+	OMPRealMatrix Product(const OMPRealMatrix& SomeMatrix) const {
 
 		CheckSummationAndSubtraction(SomeMatrix);
 
@@ -625,7 +1118,7 @@ public:
 
 		const int Height = this->Height;
 
-		OMPMatrix<SomeType> Temporary(Height, Length);
+		OMPRealMatrix<Real> Temporary(Height, Length);
 
 		omp_set_num_threads(NUMBER_OF_CORES);
 
@@ -641,35 +1134,11 @@ public:
 
 		return Temporary;
 	};
-	OMPMatrix Divide(const OMPMatrix& SomeMatrix) const {
+	OMPRealMatrix Divide(const OMPRealMatrix& SomeMatrix) const {
 
 		return this->Multiply(SomeMatrix.Inverse());
 	};
-	SomeType Scalar(const OMPMatrix& SomeMatrix) const {
-
-		CheckSummationAndSubtraction(SomeMatrix);
-
-		const int Length = this->Length;
-
-		const int Height = this->Height;
-
-		SomeType Scalar = 0;
-
-		omp_set_num_threads(NUMBER_OF_CORES);
-
-		#pragma omp parallel for schedule(static, NUMBER_OF_CORES)
-
-		for (int FirstIndex = 0; FirstIndex < Height; FirstIndex++) {
-
-			for (int SecondIndex = 0; SecondIndex < Length; SecondIndex++) {
-
-				Scalar += InnerMatrix[FirstIndex][SecondIndex] * SomeMatrix.InnerMatrix[FirstIndex][SecondIndex];
-			}
-		}
-
-		return Scalar;
-	};
-	OMPMatrix Add(const OMPMatrix& SomeMatrix) const {
+	OMPRealMatrix Add(const OMPRealMatrix& SomeMatrix) const {
 
 		CheckSummationAndSubtraction(SomeMatrix);
 
@@ -677,7 +1146,7 @@ public:
 
 		const int Height = SomeMatrix.Height;
 
-		OMPMatrix<SomeType> Temporary(Height, Length);
+		OMPRealMatrix<Real> Temporary(Height, Length);
 
 		omp_set_num_threads(NUMBER_OF_CORES);
 
@@ -693,7 +1162,31 @@ public:
 
 		return Temporary;
 	};
-	OMPMatrix Multiply(SomeType Coefficient) const {
+	Real Scalar(const OMPRealMatrix& SomeMatrix) const {
+
+		CheckSummationAndSubtraction(SomeMatrix);
+
+		const int Length = this->Length;
+
+		const int Height = this->Height;
+
+		Real Value = 0;
+
+		omp_set_num_threads(NUMBER_OF_CORES);
+
+		#pragma omp parallel for schedule(static, NUMBER_OF_CORES)
+
+		for (int FirstIndex = 0; FirstIndex < Height; FirstIndex++) {
+
+			for (int SecondIndex = 0; SecondIndex < Length; SecondIndex++) {
+
+				Value += InnerMatrix[FirstIndex][SecondIndex] * SomeMatrix.InnerMatrix[FirstIndex][SecondIndex];
+			}
+		}
+
+		return Value;
+	};
+	OMPRealMatrix Multiply(Real Coefficient) const {
 
 		CheckParameters();
 
@@ -701,7 +1194,7 @@ public:
 
 		const int Height = this->Height;
 
-		OMPMatrix<SomeType> Temporary(Height, Length);
+		OMPRealMatrix<Real> Temporary(Height, Length);
 
 		omp_set_num_threads(NUMBER_OF_CORES);
 
@@ -717,7 +1210,44 @@ public:
 
 		return Temporary;
 	};
-	SomeType Determinant() const {
+	OMPRealMatrix Exponentiate(int Power) const {
+
+		CheckSquareness();
+
+		OMPRealMatrix<Real> Temporary(*this);
+
+		for (int Index = 1; Index < Power; Index++) {
+
+			Temporary = Temporary.Multiply(*this);
+		}
+
+		return Temporary;
+	};
+	OMPRealMatrix Transpose() const {
+
+		CheckParameters();
+
+		const int Length = this->Length;
+
+		const int Height = this->Height;
+
+		OMPRealMatrix<Real> Temporary(Length, Height);
+
+		omp_set_num_threads(NUMBER_OF_CORES);
+
+		#pragma omp parallel for schedule(static, NUMBER_OF_CORES)
+
+		for (int FirstIndex = 0; FirstIndex < Length; FirstIndex++) {
+
+			for (int SecondIndex = 0; SecondIndex < Height; SecondIndex++) {
+
+				Temporary.InnerMatrix[FirstIndex][SecondIndex] = InnerMatrix[SecondIndex][FirstIndex];
+			}
+		}
+
+		return Temporary;
+	};
+	OMPRealMatrix Inverse() const {
 
 		CheckSquareness();
 
@@ -725,7 +1255,82 @@ public:
 
 		const int Height = this->Height;
 
-		OMPMatrix<SomeType> Temporary(*this);
+		OMPRealMatrix<Real> Solution(Height, Length);
+
+		OMPRealMatrix<Real> Temporary(*this);
+
+		Solution.FillMainDiagonal();
+
+		omp_set_num_threads(NUMBER_OF_CORES);
+
+		#pragma omp parallel for schedule(static, NUMBER_OF_CORES)
+
+		for (int FirstIndex = 1; FirstIndex < Height; FirstIndex++) {
+
+			for (int SecondIndex = FirstIndex; SecondIndex < Height; SecondIndex++) {
+
+				double Coefficient = CheckDivisionByZero(Temporary.InnerMatrix[SecondIndex][FirstIndex - 1] / Temporary.InnerMatrix[FirstIndex - 1][FirstIndex - 1]);
+
+				if (Coefficient != 0) {
+
+					for (int AuxiliaryIndex = 0; AuxiliaryIndex < Length; AuxiliaryIndex++) {
+
+						Temporary.InnerMatrix[SecondIndex][AuxiliaryIndex] -= Temporary.InnerMatrix[FirstIndex - 1][AuxiliaryIndex] * Coefficient;
+
+						Solution.InnerMatrix[SecondIndex][AuxiliaryIndex] -= Solution.InnerMatrix[FirstIndex - 1][AuxiliaryIndex] * Coefficient;
+					}
+				}
+			}
+		}
+
+		#pragma omp parallel for schedule(static, NUMBER_OF_CORES)
+
+		for (int FirstIndex = 0; FirstIndex < Height; FirstIndex++) {
+
+			double Coefficient = CheckDivisionByZero(1 / Temporary.InnerMatrix[FirstIndex][FirstIndex]);
+
+			for (int SecondIndex = 0; SecondIndex < Length; SecondIndex++) {
+
+				if (Coefficient != 1) {
+
+					Temporary.InnerMatrix[FirstIndex][SecondIndex] *= Coefficient;
+
+					Solution.InnerMatrix[FirstIndex][SecondIndex] *= Coefficient;
+				}
+			}
+		}
+
+		#pragma omp parallel for schedule(static, NUMBER_OF_CORES)
+
+		for (int FirstIndex = Height - 1; FirstIndex >= 0; FirstIndex--) {
+
+			for (int SecondIndex = FirstIndex; SecondIndex > 0; SecondIndex--) {
+
+				double Coefficient = CheckDivisionByZero(Temporary.InnerMatrix[SecondIndex - 1][FirstIndex] / Temporary.InnerMatrix[FirstIndex][FirstIndex]);
+
+				if (Coefficient != 0) {
+
+					for (int AuxiliaryIndex = Length - 1; AuxiliaryIndex >= 0; AuxiliaryIndex--) {
+
+						Temporary.InnerMatrix[SecondIndex - 1][AuxiliaryIndex] -= Temporary.InnerMatrix[FirstIndex][AuxiliaryIndex] * Coefficient;
+
+						Solution.InnerMatrix[SecondIndex - 1][AuxiliaryIndex] -= Solution.InnerMatrix[FirstIndex][AuxiliaryIndex] * Coefficient;
+					}
+				}
+			}
+		}
+
+		return Solution;
+	};
+	Real Determinant() const {
+
+		CheckSquareness();
+
+		const int Length = this->Length;
+
+		const int Height = this->Height;
+
+		OMPRealMatrix<Real> Temporary(*this);
 
 		double Value = 1;
 
@@ -756,123 +1361,24 @@ public:
 
 		return Value;
 	};
-	OMPMatrix Transpose() const {
 
-		CheckParameters();
-
-		const int Length = this->Length;
-
-		const int Height = this->Height;
-
-		OMPMatrix<SomeType> Temporary(Length, Height);
-
-		omp_set_num_threads(NUMBER_OF_CORES);
-
-#pragma omp parallel for schedule(static, NUMBER_OF_CORES)
-
-		for (int FirstIndex = 0; FirstIndex < Length; FirstIndex++) {
-
-			for (int SecondIndex = 0; SecondIndex < Height; SecondIndex++) {
-
-				Temporary.InnerMatrix[FirstIndex][SecondIndex] = InnerMatrix[SecondIndex][FirstIndex];
-			}
-		}
-
-		return Temporary;
-	};
-	OMPMatrix Inverse() const {
-
-		CheckSquareness();
-
-		const int Length = this->Length;
-
-		const int Height = this->Height;
-
-		OMPMatrix<SomeType> Solution(Height, Length);
-
-		OMPMatrix<SomeType> Temporary(*this);
-
-		Solution.UnitFilling();
-
-		omp_set_num_threads(NUMBER_OF_CORES);
-
-#pragma omp parallel for schedule(static, NUMBER_OF_CORES)
-
-		for (int FirstIndex = 1; FirstIndex < Height; FirstIndex++) {
-
-			for (int SecondIndex = FirstIndex; SecondIndex < Height; SecondIndex++) {
-
-				double Coefficient = CheckDivisionByZero(Temporary.InnerMatrix[SecondIndex][FirstIndex - 1] / Temporary.InnerMatrix[FirstIndex - 1][FirstIndex - 1]);
-
-				if (Coefficient != 0) {
-
-					for (int AuxiliaryIndex = 0; AuxiliaryIndex < Length; AuxiliaryIndex++) {
-
-						Temporary.InnerMatrix[SecondIndex][AuxiliaryIndex] -= Temporary.InnerMatrix[FirstIndex - 1][AuxiliaryIndex] * Coefficient;
-
-						Solution.InnerMatrix[SecondIndex][AuxiliaryIndex] -= Solution.InnerMatrix[FirstIndex - 1][AuxiliaryIndex] * Coefficient;
-					}
-				}
-			}
-		}
-
-#pragma omp parallel for schedule(static, NUMBER_OF_CORES)
-
-		for (int FirstIndex = 0; FirstIndex < Height; FirstIndex++) {
-
-			double Coefficient = CheckDivisionByZero(1 / Temporary.InnerMatrix[FirstIndex][FirstIndex]);
-
-			for (int SecondIndex = 0; SecondIndex < Length; SecondIndex++) {
-
-				if (Coefficient != 1) {
-
-					Temporary.InnerMatrix[FirstIndex][SecondIndex] *= Coefficient;
-
-					Solution.InnerMatrix[FirstIndex][SecondIndex] *= Coefficient;
-				}
-			}
-		}
-
-#pragma omp parallel for schedule(static, NUMBER_OF_CORES)
-
-		for (int FirstIndex = Height - 1; FirstIndex >= 0; FirstIndex--) {
-
-			for (int SecondIndex = FirstIndex; SecondIndex > 0; SecondIndex--) {
-
-				double Coefficient = CheckDivisionByZero(Temporary.InnerMatrix[SecondIndex - 1][FirstIndex] / Temporary.InnerMatrix[FirstIndex][FirstIndex]);
-
-				if (Coefficient != 0) {
-
-					for (int AuxiliaryIndex = Length - 1; AuxiliaryIndex >= 0; AuxiliaryIndex--) {
-
-						Temporary.InnerMatrix[SecondIndex - 1][AuxiliaryIndex] -= Temporary.InnerMatrix[FirstIndex][AuxiliaryIndex] * Coefficient;
-
-						Solution.InnerMatrix[SecondIndex - 1][AuxiliaryIndex] -= Solution.InnerMatrix[FirstIndex][AuxiliaryIndex] * Coefficient;
-					}
-				}
-			}
-		}
-
-		return Solution;
-	};
-
-	OMPMatrix& operator *= (const OMPMatrix& SomeMatrix) {
+	OMPRealMatrix& operator *= (const OMPRealMatrix& SomeMatrix) {
 
 		return *this = this->Multiply(SomeMatrix);
 	};
-	OMPMatrix& operator += (const OMPMatrix& SomeMatrix) {
+	OMPRealMatrix& operator += (const OMPRealMatrix& SomeMatrix) {
 
 		return *this = this->Add(SomeMatrix);
 	};
-	OMPMatrix& operator /= (const OMPMatrix& SomeMatrix) {
+	OMPRealMatrix& operator /= (const OMPRealMatrix& SomeMatrix) {
 
 		return *this = this->Divide(SomeMatrix);
 	};
-	OMPMatrix& operator -= (const OMPMatrix& SomeMatrix) {
+	OMPRealMatrix& operator -= (const OMPRealMatrix& SomeMatrix) {
 
 		return *this = this->Subtract(SomeMatrix);
 	};
-	OMPMatrix& operator = (const OMPMatrix& SomeMatrix) {
+	OMPRealMatrix& operator = (const OMPRealMatrix& SomeMatrix) {
 
 		if (this == &SomeMatrix) {
 
@@ -885,19 +1391,19 @@ public:
 
 		if (Length != SomeMatrix.Length || Height != SomeMatrix.Height) {
 
-			this->~OMPMatrix();
+			this->~OMPRealMatrix();
 
 			Length = SomeMatrix.Length;
 
 			Height = SomeMatrix.Height;
 
-			InnerMatrix = new SomeType*[Height];
+			InnerMatrix = new Real*[Height];
 
 			#pragma omp parallel for schedule(static, NUMBER_OF_CORES)
 
 			for (int FirstIndex = 0; FirstIndex < Height; FirstIndex++) {
 
-				InnerMatrix[FirstIndex] = new SomeType[Length];
+				InnerMatrix[FirstIndex] = new Real[Length];
 
 				for (int SecondIndex = 0; SecondIndex < Length; SecondIndex++) {
 
@@ -918,16 +1424,16 @@ public:
 
 		return *this;
 	};
-	OMPMatrix& operator *= (const SomeType Coefficient) {
+	OMPRealMatrix& operator *= (const Real Coefficient) {
 
 		return *this = this->Multiply(Coefficient);
 	};
-	OMPMatrix& operator ^= (const int Power) {
+	OMPRealMatrix& operator ^= (const int Power) {
 
 		return *this = this->Exponentiate(Power);
 	};
 
-	tuple<OMPMatrix, OMPMatrix> LUPDecomposition() const {
+	tuple<OMPRealMatrix, OMPRealMatrix> LUFactorization() const {
 
 		CheckSquareness();
 
@@ -935,59 +1441,9 @@ public:
 
 		const int Height = this->Height;
 
-		OMPMatrix<SomeType> Diagonal(Height, Length);
+		OMPRealMatrix<Real> Modified(Height, Length);
 
-		OMPMatrix<SomeType> Temporary(*this);
-
-		Diagonal.UnitFilling();
-
-		for (int FirstIndex = 0; FirstIndex < Height; FirstIndex++) {
-
-			double PivotValue = 0;
-
-			int Pivot = -1;
-
-			for (int SecondIndex = FirstIndex; SecondIndex < Height; SecondIndex++) {
-
-				if (fabs(Temporary.InnerMatrix[SecondIndex][FirstIndex]) > PivotValue) {
-
-					PivotValue = fabs(Temporary.InnerMatrix[SecondIndex][FirstIndex]);
-
-					Pivot = SecondIndex;
-				}
-			}
-
-			if (PivotValue != 0) {
-
-				Diagonal.SwapRows(Pivot, FirstIndex);
-
-				Temporary.SwapRows(Pivot, FirstIndex);
-
-				for (int SecondIndex = FirstIndex + 1; SecondIndex < Height; SecondIndex++) {
-
-					Temporary.InnerMatrix[SecondIndex][FirstIndex] = CheckDivisionByZero(Temporary.InnerMatrix[SecondIndex][FirstIndex] / Temporary.InnerMatrix[FirstIndex][FirstIndex]);
-
-					for (int AuxiliaryIndex = FirstIndex + 1; AuxiliaryIndex < Length; AuxiliaryIndex++) {
-
-						Temporary.InnerMatrix[SecondIndex][AuxiliaryIndex] -= Temporary.InnerMatrix[SecondIndex][FirstIndex] * Temporary.InnerMatrix[FirstIndex][AuxiliaryIndex];
-					}
-				}
-			}
-		}
-
-		return tuple<OMPMatrix, OMPMatrix>(Temporary, Diagonal);
-	};
-	tuple<OMPMatrix, OMPMatrix> LUDecomposition() const {
-
-		CheckSquareness();
-
-		const int Length = this->Length;
-
-		const int Height = this->Height;
-
-		OMPMatrix<SomeType> Modified(Height, Length);
-
-		OMPMatrix<SomeType> Temporary(*this);
+		OMPRealMatrix<Real> Temporary(*this);
 
 		for (int FirstIndex = 0; FirstIndex < Height; FirstIndex++) {
 
@@ -1016,9 +1472,9 @@ public:
 			}
 		}
 
-		return tuple<OMPMatrix, OMPMatrix>(Temporary, Modified);
+		return tuple<OMPRealMatrix, OMPRealMatrix>(Temporary, Modified);
 	};
-	OMPMatrix CholeskyDecomposition() const {
+	OMPRealMatrix CholeskyFactorization() const {
 
 		CheckSquareness();
 
@@ -1026,7 +1482,7 @@ public:
 
 		const int Height = this->Height;
 
-		OMPMatrix<SomeType> Temporary(Height, Length);
+		OMPRealMatrix<Real> Temporary(Height, Length);
 
 		for (int FirstIndex = 0; FirstIndex < Height; FirstIndex++) {
 
@@ -1056,14 +1512,71 @@ public:
 
 		return Temporary;
 	};
+	OMPRealMatrix UpperFactorization() const {
 
-	OMPMatrix GetColumn(int Position) const {
+		CheckParameters();
+
+		const int Length = this->Length;
+
+		const int Height = this->Height;
+
+		OMPRealMatrix<Real> Temporary(*this);
+
+		for (int FirstIndex = 1; FirstIndex < Height; FirstIndex++) {
+
+			for (int SecondIndex = FirstIndex; SecondIndex < Height; SecondIndex++) {
+
+				double Coefficient = CheckDivisionByZero(Temporary.InnerMatrix[SecondIndex][FirstIndex - 1] / Temporary.InnerMatrix[FirstIndex - 1][FirstIndex - 1]);
+
+				if (Coefficient != 0) {
+
+					for (int AuxiliaryIndex = 0; AuxiliaryIndex < Length; AuxiliaryIndex++) {
+
+						Temporary.InnerMatrix[SecondIndex][AuxiliaryIndex] -= Temporary.InnerMatrix[FirstIndex - 1][AuxiliaryIndex] * Coefficient;
+					}
+				}
+			}
+		}
+
+		return Temporary;
+	};
+	OMPRealMatrix LowerFactorization() const {
+
+		CheckParameters();
+
+		const int Length = this->Length;
+
+		const int Height = this->Height;
+
+		OMPRealMatrix<Real> Temporary(*this);
+
+		for (int FirstIndex = Height - 1; FirstIndex >= 0; FirstIndex--) {
+
+			for (int SecondIndex = FirstIndex; SecondIndex > 0; SecondIndex--) {
+
+				double Coefficient = CheckDivisionByZero(Temporary.InnerMatrix[SecondIndex - 1][FirstIndex] / Temporary.InnerMatrix[FirstIndex][FirstIndex]);
+
+				if (Coefficient != 0) {
+
+					for (int AuxiliaryIndex = Length - 1; AuxiliaryIndex >= FirstIndex; AuxiliaryIndex--) {
+
+						Temporary.InnerMatrix[SecondIndex - 1][AuxiliaryIndex] -= Temporary.InnerMatrix[FirstIndex][AuxiliaryIndex] * Coefficient;
+					}
+				}
+			}
+		}
+
+
+		return Temporary;
+	};
+
+	OMPRealMatrix GetColumn(int Position) const {
 
 		CheckParameters();
 
 		const int Height = this->Height;
 
-		OMPMatrix<SomeType> Temporary(Height);
+		OMPRealMatrix<Real> Temporary(Height);
 
 		for (int Index = 0; Index < Height; Index++) {
 
@@ -1072,13 +1585,13 @@ public:
 
 		return Temporary;
 	};
-	OMPMatrix GetRow(int Position) const {
+	OMPRealMatrix GetRow(int Position) const {
 
 		CheckParameters();
 
 		const int Length = this->Length;
 
-		OMPMatrix<SomeType> Temporary(1, Length);
+		OMPRealMatrix<Real> Temporary(1, Length);
 
 		for (int Index = 0; Index < Length; Index++) {
 
@@ -1087,13 +1600,13 @@ public:
 
 		return Temporary;
 	};
-	OMPMatrix GetMainDiagonal() const {
+	OMPRealMatrix GetMainDiagonal() const {
 
 		CheckParameters();
 
 		const int Height = this->Length;
 
-		OMPMatrix<SomeType> Temporary(Height);
+		OMPRealMatrix<Real> Temporary(Height);
 
 		for (int Index = 0; Index < Height; Index++) {
 
@@ -1102,13 +1615,13 @@ public:
 
 		return Temporary;
 	};
-	OMPMatrix GetSideDiagonal() const {
+	OMPRealMatrix GetSideDiagonal() const {
 
 		CheckParameters();
 
 		const int Height = this->Height;
 
-		OMPMatrix<SomeType> Temporary(Height);
+		OMPRealMatrix<Real> Temporary(Height);
 
 		for (int Index = 0; Index < Height; Index++) {
 
@@ -1116,6 +1629,10 @@ public:
 		}
 
 		return Temporary;
+	};
+	Real** GetMatrix() const {
+
+		return InnerMatrix;
 	};
 	int GetLength() const {
 
@@ -1125,12 +1642,12 @@ public:
 
 		return Height;
 	};
-	SomeType* operator[] (int Index) const {
+	Real* operator[] (int Index) const {
 
 		return InnerMatrix[Index];
 	};
 	
-	vector<vector<SomeType>> ToVector() {
+	vector<vector<Real>> ToVector() {
 
 		CheckParameters();
 
@@ -1138,11 +1655,11 @@ public:
 
 		const int Height = this->Height;
 
-		vector<vector<SomeType>> Temporary;
+		vector<vector<Real>> Temporary;
 
 		for (int FirstIndex = 0; FirstIndex < Height; FirstIndex++) {
 
-			Temporary.push_back(vector<SomeType>(Length));
+			Temporary.push_back(vector<Real>(Length));
 
 			for (int SecondIndex = 0; SecondIndex < Length; SecondIndex++) {
 
@@ -1152,7 +1669,7 @@ public:
 
 		return Temporary;
 	};
-	SomeType** ToPointer() {
+	Real** ToPointer() {
 
 		CheckParameters();
 
@@ -1160,24 +1677,21 @@ public:
 
 		const int Height = this->Height;
 
-		SomeType** Temporary = new SomeType*[Height];
+		Real** Temporary = new Real*[Height];
 
 		for (int FirstIndex = 0; FirstIndex < Height; FirstIndex++) {
 
-			Temporary[FirstIndex] = new SomeType[Length];
+			Temporary[FirstIndex] = new Real[Length];
 
-			for (int SecondIndex = 0; SecondIndex < Length; SecondIndex++) {
-
-				Temporary[FirstIndex][SecondIndex] = InnerMatrix[FirstIndex][SecondIndex];
-			}
+			memcpy(Temporary[FirstIndex], InnerMatrix[FirstIndex], Length);
 		}
 
 		return Temporary;
 	};
 
-	SomeType ColumnSum(int Position) {
+	Real ColumnSum(int Position) {
 
-		SomeType Value = 0;
+		Real Value = 0;
 
 		for (int Index = 0; Index < Height; Index++) {
 
@@ -1186,9 +1700,9 @@ public:
 
 		return Value;
 	};
-	SomeType RowSum(int Position) {
+	Real RowSum(int Position) {
 
-		SomeType Value = 0;
+		Real Value = 0;
 
 		for (int Index = 0; Index < Length; Index++) {
 
@@ -1197,7 +1711,7 @@ public:
 
 		return Value;
 	};
-	SomeType Average() {
+	Real Average() {
 
 		CheckParameters();
 
@@ -1205,7 +1719,7 @@ public:
 
 		const int Height = this->Height;
 
-		SomeType Value = 0;
+		Real Value = 0;
 
 		for (int FirstIndex = 0; FirstIndex < Height; FirstIndex++) {
 
@@ -1217,7 +1731,7 @@ public:
 
 		return Value / (Height * Length);
 	}
-	SomeType Rate() {
+	Real Rate() {
 
 		CheckParameters();
 
@@ -1225,7 +1739,7 @@ public:
 
 		const int Height = this->Height;
 
-		SomeType Value = 0;
+		Real Value = 0;
 
 		for (int FirstIndex = 0; FirstIndex < Height; FirstIndex++) {
 
@@ -1237,7 +1751,7 @@ public:
 
 		return sqrt(Value);
 	};
-	SomeType Max() {
+	Real Max() {
 
 		CheckParameters();
 
@@ -1245,13 +1759,33 @@ public:
 
 		const int Height = this->Height;
 
-		SomeType Value = 0;
+		Real Value = 0;
 
 		for (int FirstIndex = 0; FirstIndex < Height; FirstIndex++) {
 
 			for (int SecondIndex = 0; SecondIndex < Length; SecondIndex++) {
 
 				Value = InnerMatrix[FirstIndex][SecondIndex] > Value ? InnerMatrix[FirstIndex][SecondIndex] : Value;
+			}
+		}
+
+		return Value;
+	};
+	Real Min() {
+
+		CheckParameters();
+
+		const int Length = this->Length;
+
+		const int Height = this->Height;
+
+		Real Value = INFINITY;
+
+		for (int FirstIndex = 0; FirstIndex < Height; FirstIndex++) {
+
+			for (int SecondIndex = 0; SecondIndex < Length; SecondIndex++) {
+
+				Value = InnerMatrix[FirstIndex][SecondIndex] < Value ? InnerMatrix[FirstIndex][SecondIndex] : Value;
 			}
 		}
 
