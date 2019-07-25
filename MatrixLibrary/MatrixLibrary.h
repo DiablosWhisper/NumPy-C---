@@ -1,4 +1,5 @@
 #include <iostream>
+#include <complex>
 #include <iomanip>
 #include <sstream>
 #include <fstream>
@@ -11,16 +12,8 @@
 
 using namespace std;
 
-#pragma region
-template<typename Real>
-class OMPComplexMatrix;
-template<typename Real>
-class OMPRealMatrix;
-#pragma endregion
-
 template<typename Real>
 class OMPRealMatrix {
-
 #pragma region
 private:
 	inline OMPRealMatrix MultiplicationForLengthDividedBy_5(const OMPRealMatrix& SomeMatrix) const {
@@ -433,8 +426,7 @@ private:
 
 #pragma region
 public:
-	template<typename Real>
-	friend ostream& operator << (ostream& Stream, const OMPRealMatrix<Real>& SomeMatrix) {
+	template<typename Real> friend ostream& operator << (ostream& Stream, const OMPRealMatrix<Real>& SomeMatrix) {
 
 		const int Length = SomeMatrix.Length;
 
@@ -452,8 +444,7 @@ public:
 
 		return Stream;
 	};
-	template<typename Real>
-	friend istream& operator >> (istream& Stream, const OMPRealMatrix<Real>& SomeMatrix) {
+	template<typename Real> friend istream& operator >> (istream& Stream, const OMPRealMatrix<Real>& SomeMatrix) {
 
 		const int Length = SomeMatrix.Length;
 
@@ -838,6 +829,8 @@ public:
 
 		const int ThisHeight = Height;
 
+		InnerMatrix = new Real*[ThisHeight];
+
 		omp_set_num_threads(NUMBER_OF_CORES);
 
 		#pragma omp parallel for schedule(static, NUMBER_OF_CORES)
@@ -879,6 +872,8 @@ public:
 		const int ThisLength = Length;
 
 		const int ThisHeight = Height;
+
+		InnerMatrix = new Real*[ThisHeight];
 
 		omp_set_num_threads(NUMBER_OF_CORES);
 
@@ -939,6 +934,8 @@ public:
 
 		const int ThisHeight = Height;
 
+		InnerMatrix = new Real*[ThisHeight];
+
 		omp_set_num_threads(NUMBER_OF_CORES);
 
 		#pragma omp parallel for schedule(static, NUMBER_OF_CORES)
@@ -981,6 +978,8 @@ public:
 
 		const int ThisHeight = Height;
 
+		InnerMatrix = new Real*[ThisHeight];
+
 		omp_set_num_threads(NUMBER_OF_CORES);
 
 		#pragma omp parallel for schedule(static, NUMBER_OF_CORES)
@@ -991,7 +990,7 @@ public:
 
 			for (int SecondIndex = 0; SecondIndex < ThisLength; SecondIndex++) {
 
-				InnerMatrix[FirstIndex][SecondIndex] = SomeMatrix.InnerMatrix[FirstIndex][SecondIndex];
+				InnerMatrix[FirstIndex][SecondIndex] = SomeMatrix[FirstIndex][SecondIndex];
 			}
 		}
 	};
@@ -1029,7 +1028,13 @@ public:
 	};
 	OMPRealMatrix() {
 
+		NUMBER_OF_CORES = 0;
+
 		InnerMatrix = nullptr;
+
+		Length = 0;
+
+		Height = 0;
 	};
 
 	OMPRealMatrix operator * (const OMPRealMatrix& SomeMatrix) const {
@@ -1259,7 +1264,7 @@ public:
 
 		OMPRealMatrix<Real> Temporary(*this);
 
-		Solution.FillMainDiagonal();
+		Solution.FillMainDiagonal(1);
 
 		omp_set_num_threads(NUMBER_OF_CORES);
 
@@ -1646,7 +1651,7 @@ public:
 
 		return InnerMatrix[Index];
 	};
-	
+
 	vector<vector<Real>> ToVector() {
 
 		CheckParameters();
@@ -1683,7 +1688,10 @@ public:
 
 			Temporary[FirstIndex] = new Real[Length];
 
-			memcpy(Temporary[FirstIndex], InnerMatrix[FirstIndex], Length);
+			for (int SecondIndex = 0; SecondIndex < Length; SecondIndex++) {
+
+				Temporary[FirstIndex][SecondIndex] = InnerMatrix[FirstIndex][SecondIndex];
+			}
 		}
 
 		return Temporary;
