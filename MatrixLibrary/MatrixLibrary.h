@@ -18,17 +18,17 @@ class OMPRealMatrix {
 private:
 	inline OMPRealMatrix MultiplicationForLengthDividedBy_5(const OMPRealMatrix& SomeMatrix) const {
 
-		const int ThatLength = SomeMatrix.Length;
-
-		const int ThatHeight = SomeMatrix.Height;
-
 		const int Length = this->Length;
 
 		const int Height = this->Height;
 
-		OMPRealMatrix<Real> Temporary(Height, ThatLength);
+		const int ThatLength = SomeMatrix.Length;
+
+		const int ThatHeight = SomeMatrix.Height;
 
 		omp_set_num_threads(NUMBER_OF_CORES);
+
+		OMPRealMatrix<Real> Temporary(Height, ThatLength);
 
 		#pragma omp parallel for schedule(static, NUMBER_OF_CORES)
 
@@ -110,17 +110,17 @@ private:
 	};
 	inline OMPRealMatrix MultiplicationForLengthDividedBy_4(const OMPRealMatrix& SomeMatrix) const {
 
-		const int ThatLength = SomeMatrix.Length;
-
-		const int ThatHeight = SomeMatrix.Height;
-
 		const int Length = this->Length;
 
 		const int Height = this->Height;
 
-		OMPRealMatrix<Real> Temporary(Height, ThatLength);
+		const int ThatLength = SomeMatrix.Length;
+
+		const int ThatHeight = SomeMatrix.Height;
 
 		omp_set_num_threads(NUMBER_OF_CORES);
+
+		OMPRealMatrix<Real> Temporary(Height, ThatLength);
 
 		#pragma omp parallel for schedule(static, NUMBER_OF_CORES)
 
@@ -190,17 +190,17 @@ private:
 	};
 	inline OMPRealMatrix MultiplicationForLengthDividedBy_3(const OMPRealMatrix& SomeMatrix) const {
 
-		const int ThatLength = SomeMatrix.Length;
-
-		const int ThatHeight = SomeMatrix.Height;
-
 		const int Length = this->Length;
 
 		const int Height = this->Height;
 
-		OMPRealMatrix<Real> Temporary(Height, ThatLength);
+		const int ThatLength = SomeMatrix.Length;
+
+		const int ThatHeight = SomeMatrix.Height;
 
 		omp_set_num_threads(NUMBER_OF_CORES);
+
+		OMPRealMatrix<Real> Temporary(Height, ThatLength);
 
 		#pragma omp parallel for schedule(static, NUMBER_OF_CORES)
 
@@ -258,17 +258,17 @@ private:
 	};
 	inline OMPRealMatrix MultiplicationForLengthDividedBy_2(const OMPRealMatrix& SomeMatrix) const {
 
-		const int ThatLength = SomeMatrix.Length;
-
-		const int ThatHeight = SomeMatrix.Height;
-
 		const int Length = this->Length;
 
 		const int Height = this->Height;
 
-		OMPRealMatrix<Real> Temporary(Height, ThatLength);
+		const int ThatLength = SomeMatrix.Length;
+
+		const int ThatHeight = SomeMatrix.Height;
 
 		omp_set_num_threads(NUMBER_OF_CORES);
+
+		OMPRealMatrix<Real> Temporary(Height, ThatLength);
 
 		#pragma omp parallel for schedule(static, NUMBER_OF_CORES)
 
@@ -314,17 +314,17 @@ private:
 	};
 	inline OMPRealMatrix MultiplicationForLengthDividedBy_1(const OMPRealMatrix& SomeMatrix) const {
 
-		const int ThatLength = SomeMatrix.Length;
-
-		const int ThatHeight = SomeMatrix.Height;
-
 		const int Length = this->Length;
 
 		const int Height = this->Height;
 
-		OMPRealMatrix<Real> Temporary(Height, ThatLength);
+		const int ThatLength = SomeMatrix.Length;
+
+		const int ThatHeight = SomeMatrix.Height;
 
 		omp_set_num_threads(NUMBER_OF_CORES);
+
+		OMPRealMatrix<Real> Temporary(Height, ThatLength);
 
 		#pragma omp parallel for schedule(static, NUMBER_OF_CORES)
 
@@ -885,7 +885,7 @@ public:
 
 			for (int SecondIndex = 0; SecondIndex < ThisLength; SecondIndex++) {
 
-				InnerMatrix[FirstIndex][SecondIndex] = SomeMatrix.InnerMatrix[FirstIndex][SecondIndex];
+				InnerMatrix[FirstIndex][SecondIndex] = SomeMatrix[FirstIndex][SecondIndex];
 			}
 		}
 	};
@@ -1074,9 +1074,9 @@ public:
 
 		const int Height = this->Height;
 
-		OMPRealMatrix<Real> Temporary(Height, Length);
-
 		omp_set_num_threads(NUMBER_OF_CORES);
+
+		OMPRealMatrix<Real> Temporary(Height, Length);
 
 		#pragma omp parallel for schedule(static, NUMBER_OF_CORES)
 
@@ -1123,9 +1123,9 @@ public:
 
 		const int Height = this->Height;
 
-		OMPRealMatrix<Real> Temporary(Height, Length);
-
 		omp_set_num_threads(NUMBER_OF_CORES);
+
+		OMPRealMatrix<Real> Temporary(Height, Length);
 
 		#pragma omp parallel for schedule(static, NUMBER_OF_CORES)
 
@@ -1151,15 +1151,15 @@ public:
 
 		const int Height = SomeMatrix.Height;
 
-		OMPRealMatrix<Real> Temporary(Height, Length);
-
 		omp_set_num_threads(NUMBER_OF_CORES);
+
+		OMPRealMatrix<Real> Temporary(Height, Length);
 
 		#pragma omp parallel for schedule(static, NUMBER_OF_CORES)
 
 		for (int FirstIndex = 0; FirstIndex < Height; FirstIndex++) {
 
-			for (int SecondIndex = 0; SecondIndex < Length; SecondIndex++) {
+			for (int SecondIndex = Length; SecondIndex < Length; SecondIndex++) {
 
 				Temporary.InnerMatrix[FirstIndex][SecondIndex] = InnerMatrix[FirstIndex][SecondIndex] + SomeMatrix.InnerMatrix[FirstIndex][SecondIndex];
 			}
@@ -1171,11 +1171,11 @@ public:
 
 		CheckSummationAndSubtraction(SomeMatrix);
 
+		Real Value = 0;
+
 		const int Length = this->Length;
 
 		const int Height = this->Height;
-
-		Real Value = 0;
 
 		omp_set_num_threads(NUMBER_OF_CORES);
 
@@ -1199,9 +1199,9 @@ public:
 
 		const int Height = this->Height;
 
-		OMPRealMatrix<Real> Temporary(Height, Length);
-
 		omp_set_num_threads(NUMBER_OF_CORES);
+
+		OMPRealMatrix<Real> Temporary(Height, Length);
 
 		#pragma omp parallel for schedule(static, NUMBER_OF_CORES)
 
@@ -1236,9 +1236,9 @@ public:
 
 		const int Height = this->Height;
 
-		OMPRealMatrix<Real> Temporary(Length, Height);
-
 		omp_set_num_threads(NUMBER_OF_CORES);
+
+		OMPRealMatrix<Real> Temporary(Length, Height);
 
 		#pragma omp parallel for schedule(static, NUMBER_OF_CORES)
 
@@ -1260,13 +1260,13 @@ public:
 
 		const int Height = this->Height;
 
-		OMPRealMatrix<Real> Solution(Height, Length);
-
 		OMPRealMatrix<Real> Temporary(*this);
 
-		Solution.FillMainDiagonal(1);
-
 		omp_set_num_threads(NUMBER_OF_CORES);
+
+		OMPRealMatrix<Real> Solution(Height, Length);
+
+		Solution.FillMainDiagonal(1);
 
 		#pragma omp parallel for schedule(static, NUMBER_OF_CORES)
 
@@ -1331,13 +1331,13 @@ public:
 
 		CheckSquareness();
 
+		double Value = 1;
+
 		const int Length = this->Length;
 
 		const int Height = this->Height;
 
 		OMPRealMatrix<Real> Temporary(*this);
-
-		double Value = 1;
 
 		omp_set_num_threads(NUMBER_OF_CORES);
 
@@ -1446,9 +1446,9 @@ public:
 
 		const int Height = this->Height;
 
-		OMPRealMatrix<Real> Modified(Height, Length);
-
 		OMPRealMatrix<Real> Temporary(*this);
+
+		OMPRealMatrix<Real> Modified(Height, Length);
 
 		for (int FirstIndex = 0; FirstIndex < Height; FirstIndex++) {
 
@@ -1701,6 +1701,8 @@ public:
 
 		Real Value = 0;
 
+		const int Height = this->Height;
+
 		for (int Index = 0; Index < Height; Index++) {
 
 			Value += InnerMatrix[Index][Position];
@@ -1711,6 +1713,8 @@ public:
 	Real RowSum(int Position) {
 
 		Real Value = 0;
+
+		const int Length = this->Length;
 
 		for (int Index = 0; Index < Length; Index++) {
 
@@ -1723,11 +1727,11 @@ public:
 
 		CheckParameters();
 
+		Real Value = 0;
+
 		const int Length = this->Length;
 
 		const int Height = this->Height;
-
-		Real Value = 0;
 
 		for (int FirstIndex = 0; FirstIndex < Height; FirstIndex++) {
 
@@ -1763,11 +1767,11 @@ public:
 
 		CheckParameters();
 
+		Real Value = 0;
+
 		const int Length = this->Length;
 
 		const int Height = this->Height;
-
-		Real Value = 0;
 
 		for (int FirstIndex = 0; FirstIndex < Height; FirstIndex++) {
 
@@ -1783,11 +1787,11 @@ public:
 
 		CheckParameters();
 
+		Real Value = INFINITY;
+
 		const int Length = this->Length;
 
 		const int Height = this->Height;
-
-		Real Value = INFINITY;
 
 		for (int FirstIndex = 0; FirstIndex < Height; FirstIndex++) {
 
