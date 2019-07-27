@@ -426,7 +426,7 @@ private:
 
 #pragma region
 public:
-	template<typename Real> friend ostream& operator << (ostream& Stream, const OMPRealMatrix<Real>& SomeMatrix) {
+	friend ostream& operator << (ostream& Stream, const OMPRealMatrix<Real>& SomeMatrix) {
 
 		const int Length = SomeMatrix.Length;
 
@@ -444,7 +444,7 @@ public:
 
 		return Stream;
 	};
-	template<typename Real> friend istream& operator >> (istream& Stream, const OMPRealMatrix<Real>& SomeMatrix) {
+	friend istream& operator >> (istream& Stream, const OMPRealMatrix<Real>& SomeMatrix) {
 
 		const int Length = SomeMatrix.Length;
 
@@ -1159,7 +1159,7 @@ public:
 
 		for (int FirstIndex = 0; FirstIndex < Height; FirstIndex++) {
 
-			for (int SecondIndex = Length; SecondIndex < Length; SecondIndex++) {
+			for (int SecondIndex = 0; SecondIndex < Length; SecondIndex++) {
 
 				Temporary.InnerMatrix[FirstIndex][SecondIndex] = InnerMatrix[FirstIndex][SecondIndex] + SomeMatrix.InnerMatrix[FirstIndex][SecondIndex];
 			}
