@@ -1,0 +1,429 @@
+emplate<typename Type>
+class LinearEquationSystem {
+
+#pragma region
+private:
+	void CheckSquareness(const Matrix<Type>& SomeMatrix) const {
+
+		if (SomeMatrix.GetLength() != SomeMatrix.GetHeight()) {
+
+			throw "The length doesn't equal the height";
+		}
+	};
+	void CheckParameters(const Matrix<Type>& SomeMatrix) const {
+
+		if (SomeMatrix.GetLength() == 0 || SomeMatrix.GetHeight() == 0) {
+
+			throw "The length/height equals zero";
+		}
+	};
+	double CheckDivisionByZero(double Value) const {
+
+		if (Value == -INFINITY || Value == INFINITY || Value == NAN || Value != Value) {
+
+			return 0;
+		}
+
+		return Value;
+	};
+#pragma endregion
+
+#pragma region
+public:
+	Matrix<Type> JacobiRotation(const Matrix<Type>& SystemOfLinearEquations, const double Precision) const {
+
+		CheckSquareness(SystemOfLinearEquations);
+
+		const int Length = SystemOfLinearEquations.GetLength();
+
+		const int Height = SystemOfLinearEquations.GetHeight();
+
+		Matrix<Type> Temporary(SystemOfLinearEquations);
+
+		Matrix<Type> Diagonal(Height, Length);
+
+		Matrix<Type> Solution(Height);
+
+		Diagonal.UnitFilling();
+
+		double MaxCoefficient = 0, AngleFi = 0, Fault = 0;
+
+		int MaxCoordinateX = 0, MaxCoordinateY = 0;
+
+		#pragma omp parallel
+		{
+			#pragma omp for
+
+			for (int FirstIndex = 0; FirstIndex < Height; FirstIndex++) {
+
+				for (int SecondIndex = FirstIndex + 1; SecondIndex < Height; SecondIndex++) {
+
+					Fault += Temporary.GetMatrix()[FirstIndex][SecondIndex] * Temporary.GetMatrix()[FirstIndex][SecondIndex];
+				}
+			}
+
+			Fault = sqrt(Fault * 2);
+
+			do {
+
+				MaxCoefficient = 0;
+
+				for (int FirstIndex = 0; FirstIndex < Height; FirstIndex++) {
+
+					for (int SecondIndex = FirstIndex + 1; SecondIndex < Length; SecondIndex++) {
+
+						if (Temporary.GetMatrix()[FirstIndex][SecondIndex] > 0 && Temporary.GetMatrix()[FirstIndex][SecondIndex] > MaxCoefficient) {
+
+							MaxCoefficient = Temporary.GetMatrix()[FirstIndex][SecondIndex];
+
+							MaxCoordinateY = SecondIndex;
+
+							MaxCoordinateX = FirstIndex;
+						}
+						else if (Temporary.GetMatrix()[FirstIndex][SecondIndex] < 0 && -Temporary.GetMatrix()[FirstIndex][SecondIndex] > MaxCoefficient) {
+
+							MaxCoefficient = -Temporary.GetMatrix()[FirstIndex][SecondIndex];
+
+							MaxCoordinateY = SecondIndex;
+
+							MaxCoordinateX = FirstIndex;
+						}
+					}
+				}
+
+				Matrix<Type> Rotation(Height, Length);
+
+				Rotation.UnitFilling();
+
+				if (Temporary.GetMatrix()[MaxCoordinateX][MaxCoordinateX] == Temporary.GetMatrix()[MaxCoordinateY][MaxCoordinateY]) {
+
+					Rotation.GetMatrix()[MaxCoordinateX][MaxCoordinateX] = Rotation.GetMatrix()[MaxCoordinateY][MaxCoordinateY] = Rotation.GetMatrix()[MaxCoordinateY][MaxCoordinateX] = sqrt(2.0) / 2.0;
+
+					Rotation.GetMatrix()[MaxCoordinateX][MaxCoordinateY] = -sqrt(2.0) / 2.0;
+				}
+				else {
+
+					AngleFi = 0.5 * atan((2.0 * Temporary.GetMatrix()[MaxCoordinateX][MaxCoordinateY]) / (Temporary.GetMatrix()[MaxCoordinateX][MaxCoordinateX] - Temporary.GetMatrix()[MaxCoordinateY][MaxCoordinateY]));
+
+					Rotation.GetMatrix()[MaxCoordinateX][MaxCoordinateX] = Rotation.GetMatrix()[MaxCoordinateY][MaxCoordinateY] = cos(AngleFi);
+
+					Rotation.GetMatrix()[MaxCoordinateX][MaxCoordinateY] = -sin(AngleFi);
+
+					Rotation.GetMatrix()[MaxCoordinateY][MaxCoordinateX] = sin(AngleFi);
+				}
+
+				Temporary = Rotation.Transpose().Multiply(Temporary).Multiply(Rotation);
+
+				Fault = 0.0;
+
+				for (int FirstIndex = 0; FirstIndex < Height; FirstIndex++) {
+
+					for (int SecondIndex = FirstIndex + 1; SecondIndex < Height; SecondIndex++) {
+
+						Fault += Temporary.GetMatrix()[FirstIndex][SecondIndex] * Temporary.GetMatrix()[FirstIndex][SecondIndex];
+					}
+				}
+
+				Fault = sqrt(Fault * 2);
+
+				Diagonal *= Rotation;
+
+			} while (Fault > Precision);
+
+			for (int Index = 0; Index < Height; Index++) {
+
+				Solution.GetMatrix()[Index][0] = Temporary.GetMatrix()[Index][Index];
+			}
+		}
+
+		return Solution;
+	};
+	Matrix<Type> GaussSeidel(const Matrix<Type>& SystemOfLinearEquations, const double Precision) const {
+
+		CheckParameters(SystemOfLinearEquations);
+
+		const int Length = SystemOfLinearEquations.GetLength();
+
+		const int Height = SystemOfLinearEquations.GetHeight();
+
+		Matrix<Type> Temporary = SystemOfLinearEquations.Cut(0, 0, Height - 1, Length - 2);
+
+		Matrix<Type> Solution(Height);
+
+		double Rate = 1;
+
+		omp_set_num_threads(NUMBER_OF_CORES);
+
+		#pragma omp parallel
+		{
+			#pragma omp for
+
+			do {
+
+				Matrix<Type> Vector = Solution;
+
+				for (int FirstIndex = 0; FirstIndex < Height; FirstIndex++) {
+
+					double Coefficient = 0;
+
+					for (int SecondIndex = 0; SecondIndex < FirstIndex; SecondIndex++) {
+
+						Coefficient += Temporary.GetMatrix()[FirstIndex][SecondIndex] * Solution.GetMatrix()[SecondIndex][0];
+					}
+
+					for (int SecondIndex = FirstIndex + 1; SecondIndex < Length - 1; SecondIndex++) {
+
+						Coefficient += Temporary.GetMatrix()[FirstIndex][SecondIndex] * Vector.GetMatrix()[SecondIndex][0];
+					}
+
+					Solution.GetMatrix()[FirstIndex][0] = (SystemOfLinearEquations.GetMatrix()[FirstIndex][Length - 1] - Coefficient) / Temporary.GetMatrix()[FirstIndex][FirstIndex];
+				}
+
+				Rate = Solution.Subtract(Vector).Rate();
+
+			} while (Rate > Precision);
+		}
+
+		return Solution;
+	};
+	Matrix<Type> Kaczmarz(const Matrix<Type>& SystemOfLinearEquations, const double Precision) const {
+
+		CheckParameters(SystemOfLinearEquations);
+
+		const int Length = SystemOfLinearEquations.GetLength();
+
+		const int Height = SystemOfLinearEquations.GetHeight();
+
+		Matrix<Type> Temporary = SystemOfLinearEquations.Cut(0, 0, Height - 1, Length - 2);
+
+		Matrix<Type> Solution = Temporary.GetRow(0);
+
+		double Rate = 1;
+
+		int Counter = 0;
+
+		do {
+
+			Matrix<Type> Vector = Temporary.GetRow(Counter);
+
+			double Coefficient = CheckDivisionByZero(SystemOfLinearEquations.GetMatrix()[Counter][Length - 1] - Vector.Scalar(Solution)) / (Vector.Rate() * Vector.Rate());
+
+			Counter = Counter < Height - 1 ? Counter += 1 : 0;
+
+			Rate = Solution.Add(Vector.Multiply(Coefficient)).Subtract(Solution).Rate();
+
+			Solution += (Vector.Multiply(Coefficient));
+
+		} while (Rate > Precision);
+
+		Solution = Solution.Transpose();
+
+		return Solution;
+	};
+	Matrix<Type> Jacobi(const Matrix<Type>& SystemOfLinearEquations, const double Precision) const {
+
+		CheckParameters(SystemOfLinearEquations);
+
+		const int Length = SystemOfLinearEquations.GetLength();
+
+		const int Height = SystemOfLinearEquations.GetHeight();
+
+		Matrix<Type> Temporary = SystemOfLinearEquations.Cut(0, 0, Height - 1, Length - 2);
+
+		Matrix<Type> Solution(Height);
+
+		double Rate = 1;
+
+		omp_set_num_threads(NUMBER_OF_CORES);
+
+		#pragma omp parallel
+		{
+			#pragma omp for
+
+			do {
+
+				Matrix<Type> Vector(Height);
+
+				for (int FirstIndex = 0; FirstIndex < Height; FirstIndex++) {
+
+					Vector.GetMatrix()[FirstIndex][0] = SystemOfLinearEquations.GetColumn(Length - 1).GetMatrix()[FirstIndex][0];
+
+					for (int SecondIndex = 0; SecondIndex < Length - 1; SecondIndex++) {
+
+						if (FirstIndex != SecondIndex) {
+
+							Vector.GetMatrix()[FirstIndex][0] -= Temporary.GetMatrix()[FirstIndex][SecondIndex] * Solution.GetMatrix()[SecondIndex][0];
+						}
+					}
+
+					Vector.GetMatrix()[FirstIndex][0] = CheckDivisionByZero(Vector.GetMatrix()[FirstIndex][0] / Temporary.GetMatrix()[FirstIndex][FirstIndex]);
+				}
+
+				Rate = fabs(Solution.GetMatrix()[0][0] - Vector.GetMatrix()[0][0]);
+
+				for (int Index = 0; Index < Height; Index++) {
+
+					if (fabs(Solution.GetMatrix()[Index][0] - Vector.GetMatrix()[Index][0]) > Rate) {
+
+						Rate = fabs(Solution.GetMatrix()[Index][0] - Vector.GetMatrix()[Index][0]);
+					}
+
+					Solution.GetMatrix()[Index][0] = Vector.GetMatrix()[Index][0];
+				}
+
+			} while (Rate > Precision);
+		}
+
+		return Solution;
+	};
+	Matrix<Type> GaussJordan(const Matrix<Type>& SystemOfLinearEquations) const {
+
+		CheckParameters(SystemOfLinearEquations);
+
+		const int Length = SystemOfLinearEquations.GetLength();
+
+		const int Height = SystemOfLinearEquations.GetHeight();
+
+		Matrix<Type> Temporary(SystemOfLinearEquations);
+
+		Matrix<Type> Solution(Height);
+
+		omp_set_num_threads(NUMBER_OF_CORES);
+
+		#pragma omp parallel
+		{
+			#pragma omp for
+
+			for (int FirstIndex = 1; FirstIndex < Height; FirstIndex++) {
+
+				for (int SecondIndex = FirstIndex; SecondIndex < Height; SecondIndex++) {
+
+					double Coefficient = CheckDivisionByZero(Temporary.GetMatrix()[SecondIndex][FirstIndex - 1] / Temporary.GetMatrix()[FirstIndex - 1][FirstIndex - 1]);
+
+					if (Coefficient != 0) {
+
+						for (int AuxiliaryIndex = 0; AuxiliaryIndex < Length; AuxiliaryIndex++) {
+
+							Temporary.GetMatrix()[SecondIndex][AuxiliaryIndex] -= Temporary.GetMatrix()[FirstIndex - 1][AuxiliaryIndex] * Coefficient;
+						}
+					}
+				}
+			}
+
+			for (int FirstIndex = Height - 1; FirstIndex >= 0; FirstIndex--) {
+
+				for (int SecondIndex = FirstIndex; SecondIndex > 0; SecondIndex--) {
+
+					double Coefficient = CheckDivisionByZero(Temporary.GetMatrix()[SecondIndex - 1][FirstIndex] / Temporary.GetMatrix()[FirstIndex][FirstIndex]);
+
+					if (Coefficient != 0) {
+
+						for (int AuxiliaryIndex = Length - 1; AuxiliaryIndex >= FirstIndex; AuxiliaryIndex--) {
+
+							Temporary.GetMatrix()[SecondIndex - 1][AuxiliaryIndex] -= Temporary.GetMatrix()[FirstIndex][AuxiliaryIndex] * Coefficient;
+						}
+					}
+				}
+			}
+
+			for (int Index = 0; Index < Height; Index++) {
+
+				Solution.GetMatrix()[Index][0] = CheckDivisionByZero(Temporary.GetMatrix()[Index][Length - 1] / Temporary.GetMatrix()[Index][Index]);
+			}
+		}
+
+		return Solution;
+	};
+	Matrix<Type> Kramer(const Matrix<Type>& SystemOfLinearEquations) const {
+
+		CheckParameters(SystemOfLinearEquations);
+
+		const int Length = SystemOfLinearEquations.GetLength();
+
+		const int Height = SystemOfLinearEquations.GetHeight();
+
+		Matrix<Type> Temporary = SystemOfLinearEquations.Cut(0, 0, Height - 1, Length - 2);
+
+		Matrix<Type> Solution(Height);
+
+		double Delta = (double)Temporary.Determinant();
+
+		for (int Index = 0; Index < Length - 1; Index++) {
+
+			Matrix<Type> Column = SystemOfLinearEquations.GetColumn(Length - 1);
+
+			Matrix<Type> Modified = Temporary.Replace(Index, Column);
+
+			Solution.GetMatrix()[Index][0] = CheckDivisionByZero(Modified.Determinant() / Delta);
+		}
+
+		return Solution;
+	};
+	Matrix<Type> Inverse(const Matrix<Type>& SystemOfLinearEquations) const {
+
+		CheckParameters(SystemOfLinearEquations);
+
+		const int Length = SystemOfLinearEquations.GetLength();
+
+		const int Height = SystemOfLinearEquations.GetHeight();
+
+		Matrix<Type> Temporary = SystemOfLinearEquations.Cut(0, 0, Height - 1, Length - 2);
+
+		Matrix<Type> Column = SystemOfLinearEquations.GetColumn(Length - 1);
+
+		Matrix<Type> Solution(Height);
+
+		Solution = Temporary.Inverse().Multiply(Column);
+
+		return Solution;
+	};
+	Matrix<Type> Gauss(const Matrix<Type>& SystemOfLinearEquations) const {
+
+		CheckParameters(SystemOfLinearEquations);
+
+		const int Length = SystemOfLinearEquations.GetLength();
+
+		const int Height = SystemOfLinearEquations.GetHeight();
+
+		Matrix<Type> Temporary(SystemOfLinearEquations);
+
+		Matrix<Type> Solution(Height);
+
+		#pragma omp parallel
+		{
+			#pragma omp for
+
+			for (int FirstIndex = 1; FirstIndex < Height; FirstIndex++) {
+
+				for (int SecondIndex = FirstIndex; SecondIndex < Height; SecondIndex++) {
+
+					double Coefficient = CheckDivisionByZero(Temporary.GetMatrix()[SecondIndex][FirstIndex - 1] / Temporary.GetMatrix()[FirstIndex - 1][FirstIndex - 1]);
+
+					if (Coefficient != 0) {
+
+						for (int AuxiliaryIndex = 0; AuxiliaryIndex < Length; AuxiliaryIndex++) {
+
+							Temporary.GetMatrix()[SecondIndex][AuxiliaryIndex] -= Temporary.GetMatrix()[FirstIndex - 1][AuxiliaryIndex] * Coefficient;
+						}
+					}
+				}
+			}
+
+			for (int FirstIndex = Height - 1; FirstIndex >= 0; FirstIndex--) {
+
+				Solution.GetMatrix()[FirstIndex][0] = CheckDivisionByZero(Temporary.GetMatrix()[FirstIndex][Length - 1] / Temporary.GetMatrix()[FirstIndex][FirstIndex]);
+
+				for (int SecondIndex = Height - 1; SecondIndex > FirstIndex; SecondIndex--) {
+
+					Solution.GetMatrix()[FirstIndex][0] -= CheckDivisionByZero(Temporary.GetMatrix()[FirstIndex][SecondIndex] * Solution.GetMatrix()[SecondIndex][0] / Temporary.GetMatrix()[FirstIndex][FirstIndex]);
+				}
+			}
+		}
+
+		return Solution;
+	};
+
+	~LinearEquationSystem() = default;
+	LinearEquationSystem() = default;
+#pragma endregion
+};
