@@ -16,7 +16,12 @@ using namespace std;
 template<typename Type>
 class OmpMatrix {
 #pragma region
-protected:
+private:
+	const string SummationAndSubtractionException = "The length/height of the first matrix doesn't equal the length/height of the second matrix";
+	const string MultiplicationException = "The length of the first matrix doesn't equal the height of the second matrix";
+	const string SquarenessException = "The length doesn't equal the height";
+	const string ParametersException = "The length/height equals zero";
+
 	inline OmpMatrix MultiplicationForLengthDividedBy_5(const OmpMatrix& SomeMatrix) const {
 
 		const int ThatLength = SomeMatrix.Length;
@@ -33,52 +38,52 @@ protected:
 
 		for (int SecondIndex = 0; SecondIndex < ThatLength; SecondIndex += 5) {
 
-			Type* ThatColumn_4 = new Type[ThatHeight];
-			Type* ThatColumn_3 = new Type[ThatHeight];
-			Type* ThatColumn_2 = new Type[ThatHeight];
-			Type* ThatColumn_1 = new Type[ThatHeight];
 			Type* ThatColumn_0 = new Type[ThatHeight];
+			Type* ThatColumn_1 = new Type[ThatHeight];
+			Type* ThatColumn_2 = new Type[ThatHeight];
+			Type* ThatColumn_3 = new Type[ThatHeight];
+			Type* ThatColumn_4 = new Type[ThatHeight];
 
 			for (int AuxiliaryIndex = 0; AuxiliaryIndex < Length; AuxiliaryIndex++) {
 
-				ThatColumn_4[AuxiliaryIndex] = SomeMatrix.InnerMatrix[AuxiliaryIndex][4 + SecondIndex];
-				ThatColumn_3[AuxiliaryIndex] = SomeMatrix.InnerMatrix[AuxiliaryIndex][3 + SecondIndex];
-				ThatColumn_2[AuxiliaryIndex] = SomeMatrix.InnerMatrix[AuxiliaryIndex][2 + SecondIndex];
-				ThatColumn_1[AuxiliaryIndex] = SomeMatrix.InnerMatrix[AuxiliaryIndex][1 + SecondIndex];
 				ThatColumn_0[AuxiliaryIndex] = SomeMatrix.InnerMatrix[AuxiliaryIndex][0 + SecondIndex];
+				ThatColumn_1[AuxiliaryIndex] = SomeMatrix.InnerMatrix[AuxiliaryIndex][1 + SecondIndex];
+				ThatColumn_2[AuxiliaryIndex] = SomeMatrix.InnerMatrix[AuxiliaryIndex][2 + SecondIndex];
+				ThatColumn_3[AuxiliaryIndex] = SomeMatrix.InnerMatrix[AuxiliaryIndex][3 + SecondIndex];
+				ThatColumn_4[AuxiliaryIndex] = SomeMatrix.InnerMatrix[AuxiliaryIndex][4 + SecondIndex];
 			}
 
 			for (int FirstIndex = 0; FirstIndex < Height; FirstIndex++) {
 
 				Type* ThisRow = InnerMatrix[FirstIndex];
 
-				Type Summation_4 = 0;
-				Type Summation_3 = 0;
-				Type Summation_2 = 0;
-				Type Summation_1 = 0;
 				Type Summation_0 = 0;
+				Type Summation_1 = 0;
+				Type Summation_2 = 0;
+				Type Summation_3 = 0;
+				Type Summation_4 = 0;
 
 				for (int AuxiliaryIndex = 0; AuxiliaryIndex < Length; AuxiliaryIndex++) {
 
-					Summation_4 += ThisRow[AuxiliaryIndex] * ThatColumn_4[AuxiliaryIndex];
-					Summation_3 += ThisRow[AuxiliaryIndex] * ThatColumn_3[AuxiliaryIndex];
-					Summation_2 += ThisRow[AuxiliaryIndex] * ThatColumn_2[AuxiliaryIndex];
-					Summation_1 += ThisRow[AuxiliaryIndex] * ThatColumn_1[AuxiliaryIndex];
 					Summation_0 += ThisRow[AuxiliaryIndex] * ThatColumn_0[AuxiliaryIndex];
+					Summation_1 += ThisRow[AuxiliaryIndex] * ThatColumn_1[AuxiliaryIndex];
+					Summation_2 += ThisRow[AuxiliaryIndex] * ThatColumn_2[AuxiliaryIndex];
+					Summation_3 += ThisRow[AuxiliaryIndex] * ThatColumn_3[AuxiliaryIndex];
+					Summation_4 += ThisRow[AuxiliaryIndex] * ThatColumn_4[AuxiliaryIndex];
 				}
 
-				Temporary.InnerMatrix[FirstIndex][4 + SecondIndex] = Summation_4;
-				Temporary.InnerMatrix[FirstIndex][3 + SecondIndex] = Summation_3;
-				Temporary.InnerMatrix[FirstIndex][2 + SecondIndex] = Summation_2;
-				Temporary.InnerMatrix[FirstIndex][1 + SecondIndex] = Summation_1;
 				Temporary.InnerMatrix[FirstIndex][0 + SecondIndex] = Summation_0;
+				Temporary.InnerMatrix[FirstIndex][1 + SecondIndex] = Summation_1;
+				Temporary.InnerMatrix[FirstIndex][2 + SecondIndex] = Summation_2;
+				Temporary.InnerMatrix[FirstIndex][3 + SecondIndex] = Summation_3;
+				Temporary.InnerMatrix[FirstIndex][4 + SecondIndex] = Summation_4;
 			}
 
-			delete[] ThatColumn_4;
-			delete[] ThatColumn_3;
-			delete[] ThatColumn_2;
-			delete[] ThatColumn_1;
 			delete[] ThatColumn_0;
+			delete[] ThatColumn_1;
+			delete[] ThatColumn_2;
+			delete[] ThatColumn_3;
+			delete[] ThatColumn_4;
 		}
 
 		return Temporary;
@@ -99,46 +104,46 @@ protected:
 
 		for (int SecondIndex = 0; SecondIndex < ThatLength; SecondIndex += 4) {
 
-			Type* ThatColumn_3 = new Type[ThatHeight];
-			Type* ThatColumn_2 = new Type[ThatHeight];
-			Type* ThatColumn_1 = new Type[ThatHeight];
 			Type* ThatColumn_0 = new Type[ThatHeight];
+			Type* ThatColumn_1 = new Type[ThatHeight];
+			Type* ThatColumn_2 = new Type[ThatHeight];
+			Type* ThatColumn_3 = new Type[ThatHeight];
 
 			for (int AuxiliaryIndex = 0; AuxiliaryIndex < Length; AuxiliaryIndex++) {
 
-				ThatColumn_3[AuxiliaryIndex] = SomeMatrix.InnerMatrix[AuxiliaryIndex][3 + SecondIndex];
-				ThatColumn_2[AuxiliaryIndex] = SomeMatrix.InnerMatrix[AuxiliaryIndex][2 + SecondIndex];
-				ThatColumn_1[AuxiliaryIndex] = SomeMatrix.InnerMatrix[AuxiliaryIndex][1 + SecondIndex];
 				ThatColumn_0[AuxiliaryIndex] = SomeMatrix.InnerMatrix[AuxiliaryIndex][0 + SecondIndex];
+				ThatColumn_1[AuxiliaryIndex] = SomeMatrix.InnerMatrix[AuxiliaryIndex][1 + SecondIndex];
+				ThatColumn_2[AuxiliaryIndex] = SomeMatrix.InnerMatrix[AuxiliaryIndex][2 + SecondIndex];
+				ThatColumn_3[AuxiliaryIndex] = SomeMatrix.InnerMatrix[AuxiliaryIndex][3 + SecondIndex];
 			}
 
 			for (int FirstIndex = 0; FirstIndex < Height; FirstIndex++) {
 
 				Type* ThisRow = InnerMatrix[FirstIndex];
 
-				Type Summation_3 = 0;
-				Type Summation_2 = 0;
-				Type Summation_1 = 0;
 				Type Summation_0 = 0;
+				Type Summation_1 = 0;
+				Type Summation_2 = 0;
+				Type Summation_3 = 0;
 
 				for (int AuxiliaryIndex = 0; AuxiliaryIndex < Length; AuxiliaryIndex++) {
 
-					Summation_3 += ThisRow[AuxiliaryIndex] * ThatColumn_3[AuxiliaryIndex];
-					Summation_2 += ThisRow[AuxiliaryIndex] * ThatColumn_2[AuxiliaryIndex];
-					Summation_1 += ThisRow[AuxiliaryIndex] * ThatColumn_1[AuxiliaryIndex];
 					Summation_0 += ThisRow[AuxiliaryIndex] * ThatColumn_0[AuxiliaryIndex];
+					Summation_1 += ThisRow[AuxiliaryIndex] * ThatColumn_1[AuxiliaryIndex];
+					Summation_2 += ThisRow[AuxiliaryIndex] * ThatColumn_2[AuxiliaryIndex];
+					Summation_3 += ThisRow[AuxiliaryIndex] * ThatColumn_3[AuxiliaryIndex];
 				}
 
-				Temporary.InnerMatrix[FirstIndex][3 + SecondIndex] = Summation_3;
-				Temporary.InnerMatrix[FirstIndex][2 + SecondIndex] = Summation_2;
-				Temporary.InnerMatrix[FirstIndex][1 + SecondIndex] = Summation_1;
 				Temporary.InnerMatrix[FirstIndex][0 + SecondIndex] = Summation_0;
+				Temporary.InnerMatrix[FirstIndex][1 + SecondIndex] = Summation_1;
+				Temporary.InnerMatrix[FirstIndex][2 + SecondIndex] = Summation_2;
+				Temporary.InnerMatrix[FirstIndex][3 + SecondIndex] = Summation_3;
 			}
 
-			delete[] ThatColumn_3;
-			delete[] ThatColumn_2;
-			delete[] ThatColumn_1;
 			delete[] ThatColumn_0;
+			delete[] ThatColumn_1;
+			delete[] ThatColumn_2;
+			delete[] ThatColumn_3;
 		}
 
 		return Temporary;
@@ -159,40 +164,40 @@ protected:
 
 		for (int SecondIndex = 0; SecondIndex < ThatLength; SecondIndex += 3) {
 
-			Type* ThatColumn_2 = new Type[ThatHeight];
-			Type* ThatColumn_1 = new Type[ThatHeight];
 			Type* ThatColumn_0 = new Type[ThatHeight];
+			Type* ThatColumn_1 = new Type[ThatHeight];
+			Type* ThatColumn_2 = new Type[ThatHeight];
 
 			for (int AuxiliaryIndex = 0; AuxiliaryIndex < Length; AuxiliaryIndex++) {
 
-				ThatColumn_2[AuxiliaryIndex] = SomeMatrix.InnerMatrix[AuxiliaryIndex][2 + SecondIndex];
-				ThatColumn_1[AuxiliaryIndex] = SomeMatrix.InnerMatrix[AuxiliaryIndex][1 + SecondIndex];
 				ThatColumn_0[AuxiliaryIndex] = SomeMatrix.InnerMatrix[AuxiliaryIndex][0 + SecondIndex];
+				ThatColumn_1[AuxiliaryIndex] = SomeMatrix.InnerMatrix[AuxiliaryIndex][1 + SecondIndex];
+				ThatColumn_2[AuxiliaryIndex] = SomeMatrix.InnerMatrix[AuxiliaryIndex][2 + SecondIndex];
 			}
 
 			for (int FirstIndex = 0; FirstIndex < Height; FirstIndex++) {
 
 				Type* ThisRow = InnerMatrix[FirstIndex];
 
-				Type Summation_2 = 0;
-				Type Summation_1 = 0;
 				Type Summation_0 = 0;
+				Type Summation_1 = 0;
+				Type Summation_2 = 0;
 
 				for (int AuxiliaryIndex = 0; AuxiliaryIndex < Length; AuxiliaryIndex++) {
 
-					Summation_2 += ThisRow[AuxiliaryIndex] * ThatColumn_2[AuxiliaryIndex];
-					Summation_1 += ThisRow[AuxiliaryIndex] * ThatColumn_1[AuxiliaryIndex];
 					Summation_0 += ThisRow[AuxiliaryIndex] * ThatColumn_0[AuxiliaryIndex];
+					Summation_1 += ThisRow[AuxiliaryIndex] * ThatColumn_1[AuxiliaryIndex];
+					Summation_2 += ThisRow[AuxiliaryIndex] * ThatColumn_2[AuxiliaryIndex];
 				}
 
-				Temporary.InnerMatrix[FirstIndex][2 + SecondIndex] = Summation_2;
-				Temporary.InnerMatrix[FirstIndex][1 + SecondIndex] = Summation_1;
 				Temporary.InnerMatrix[FirstIndex][0 + SecondIndex] = Summation_0;
+				Temporary.InnerMatrix[FirstIndex][1 + SecondIndex] = Summation_1;
+				Temporary.InnerMatrix[FirstIndex][2 + SecondIndex] = Summation_2;
 			}
 
-			delete[] ThatColumn_2;
-			delete[] ThatColumn_1;
 			delete[] ThatColumn_0;
+			delete[] ThatColumn_1;
+			delete[] ThatColumn_2;
 		}
 
 		return Temporary;
@@ -213,34 +218,34 @@ protected:
 
 		for (int SecondIndex = 0; SecondIndex < ThatLength; SecondIndex += 2) {
 
-			Type* ThatColumn_1 = new Type[ThatHeight];
 			Type* ThatColumn_0 = new Type[ThatHeight];
+			Type* ThatColumn_1 = new Type[ThatHeight];
 
 			for (int AuxiliaryIndex = 0; AuxiliaryIndex < Length; AuxiliaryIndex++) {
 
-				ThatColumn_1[AuxiliaryIndex] = SomeMatrix.InnerMatrix[AuxiliaryIndex][1 + SecondIndex];
 				ThatColumn_0[AuxiliaryIndex] = SomeMatrix.InnerMatrix[AuxiliaryIndex][0 + SecondIndex];
+				ThatColumn_1[AuxiliaryIndex] = SomeMatrix.InnerMatrix[AuxiliaryIndex][1 + SecondIndex];
 			}
 
 			for (int FirstIndex = 0; FirstIndex < Height; FirstIndex++) {
 
 				Type* ThisRow = InnerMatrix[FirstIndex];
 
-				Type Summation_1 = 0;
 				Type Summation_0 = 0;
+				Type Summation_1 = 0;
 
 				for (int AuxiliaryIndex = 0; AuxiliaryIndex < Length; AuxiliaryIndex++) {
 
-					Summation_1 += ThisRow[AuxiliaryIndex] * ThatColumn_1[AuxiliaryIndex];
 					Summation_0 += ThisRow[AuxiliaryIndex] * ThatColumn_0[AuxiliaryIndex];
+					Summation_1 += ThisRow[AuxiliaryIndex] * ThatColumn_1[AuxiliaryIndex];
 				}
 
-				Temporary.InnerMatrix[FirstIndex][1 + SecondIndex] = Summation_1;
 				Temporary.InnerMatrix[FirstIndex][0 + SecondIndex] = Summation_0;
+				Temporary.InnerMatrix[FirstIndex][1 + SecondIndex] = Summation_1;
 			}
 
-			delete[] ThatColumn_1;
 			delete[] ThatColumn_0;
+			delete[] ThatColumn_1;
 		}
 
 		return Temporary;
@@ -261,82 +266,31 @@ protected:
 
 		for (int SecondIndex = 0; SecondIndex < ThatLength; SecondIndex++) {
 
-			Type* ThatColumn = new Type[ThatHeight];
+			Type* ThatColumn_0 = new Type[ThatHeight];
 
 			for (int AuxiliaryIndex = 0; AuxiliaryIndex < Length; AuxiliaryIndex++) {
 
-				ThatColumn[AuxiliaryIndex] = SomeMatrix.InnerMatrix[AuxiliaryIndex][SecondIndex];
+				ThatColumn_0[AuxiliaryIndex] = SomeMatrix.InnerMatrix[AuxiliaryIndex][0 + SecondIndex];
 			}
 
 			for (int FirstIndex = 0; FirstIndex < Height; FirstIndex++) {
 
 				Type* ThisRow = InnerMatrix[FirstIndex];
 
-				Type Summation = 0;
+				Type Summation_0 = 0;
 
 				for (int AuxiliaryIndex = 0; AuxiliaryIndex < Length; AuxiliaryIndex++) {
 
-					Summation += ThisRow[AuxiliaryIndex] * ThatColumn[AuxiliaryIndex];
+					Summation_0 += ThisRow[AuxiliaryIndex] * ThatColumn_0[AuxiliaryIndex];
 				}
 
-				Temporary.InnerMatrix[FirstIndex][SecondIndex] = Summation;
+				Temporary.InnerMatrix[FirstIndex][0 + SecondIndex] = Summation_0;
 			}
 
-			delete[] ThatColumn;
+			delete[] ThatColumn_0;
 		}
 
 		return Temporary;
-	};
-
-	inline void CheckSummationAndSubtraction(const OmpMatrix& SomeMatrix) const {
-
-		if (Length != SomeMatrix.Length || Height != SomeMatrix.Height) {
-
-			throw "The length/height of the first matrix doesn't equal the length/height of the second matrix";
-		}
-	};
-	inline bool CheckPositiveDefinition(const OmpMatrix& SomeMatrix) const {
-
-		OmpMatrix<Type> Temporary(SomeMatrix.Height);
-
-		Temporary.Randomize();
-
-		if ((Temporary.Transpose().Multiply(SomeMatrix).Multiply(Temporary))[0][0] > 0) {
-
-			return true;
-		}
-
-		return false;
-	};
-	inline void CheckMultiplication(const OmpMatrix& SomeMatrix) const {
-
-		if (Length != SomeMatrix.Height) {
-
-			throw "The length of the first matrix doesn't equal the height of the second matrix";
-		}
-	};
-	inline double CheckDivisionByZero(double Value) const {
-
-		if (Value == -INFINITY || Value == INFINITY || Value == NAN || Value != Value) {
-
-			return 0;
-		}
-
-		return Value;
-	};
-	inline void CheckSquareness() const {
-
-		if (Length != Height) {
-
-			throw "The length doesn't equal the height";
-		}
-	};
-	inline void CheckParameters() const {
-
-		if (Length == 0 || Height == 0) {
-
-			throw "The length/height equals zero";
-		}
 	};
 
 	inline void SwapRows(int FirstIndex, int SecondIndex) {
@@ -350,9 +304,152 @@ protected:
 
 	const int MAX_NUMBER = omp_get_max_threads();
 	int NUMBER_OF_CORES;
+
 	Type** InnerMatrix;
 	int Length;
 	int Height;
+#pragma endregion
+
+#pragma region
+public :
+	inline bool CheckSummationAndSubtraction(const OmpMatrix& SomeMatrix) const {
+
+		return Length == SomeMatrix.Length && Height == SomeMatrix.Height;
+	};
+	inline bool CheckMultiplication(const OmpMatrix& SomeMatrix) const {
+
+		return Length == SomeMatrix.Height;
+	};
+	inline double CheckDivisionByZero(double Value) const {
+
+		if (Value == -INFINITY || Value == INFINITY || Value == NAN || Value != Value) {
+
+			return 0;
+		}
+
+		return Value;
+	};
+	inline bool CheckPositiveDefinition() const {
+
+		if(!CheckSquareness()) {
+
+			throw invalid_argument(SquarenessException);
+		}
+
+		OmpMatrix<Type> Temporary(Height);
+
+		Temporary.Randomize();
+
+		return Temporary.Transpose().Multiply(*this).Multiply(Temporary)[0][0] > 0;
+	};
+	inline bool CheckSkewHermitianity() const {
+
+		if(!CheckSquareness()) {
+
+			throw invalid_argument(SquarenessException);
+		}
+
+		const int Lenght = this->Length;
+		const int Height = this->Height;
+
+		for(int FirstIndex = 0; FirstIndex < Height; FirstIndex++) {
+
+			for(int SecondIndex = 0; SecondIndex < Length; SecondIndex++) {
+
+				if(conj(InnerMatrix[SecondIndex][FirstIndex]) != -InnerMatrix[FirstIndex][SecondIndex]) {
+
+					return false;
+				}
+			}
+		}
+
+		return true;
+	};
+	inline bool CheckOrthogonality() const {
+
+		if(!CheckSquareness()) {
+
+			throw invalid_argument(SquarenessException);
+		}
+
+		OmpMatrix<Type> Temporary(Height, Length);
+
+		return this->Transpose().Multiply(*this) == Temporary.FillMainDiagonal(1);
+	};
+	inline bool CheckHermitianity() const {
+		
+		if(!CheckSquareness()) {
+
+			throw invalid_argument(SquarenessException);
+		}
+
+		const int Lenght = this->Length;
+		const int Height = this->Height;
+
+		for(int FirstIndex = 0; FirstIndex < Height; FirstIndex++) {
+
+			for(int SecondIndex = 0; SecondIndex < Length; SecondIndex++) {
+
+				if(conj(InnerMatrix[SecondIndex][FirstIndex]) != InnerMatrix[FirstIndex][SecondIndex]) {
+
+					return false;
+				}
+			}
+		}
+
+		return true;
+	};
+	inline bool CheckSkewSymmetry() const {
+
+		if(!CheckSquareness()) {
+
+			throw invalid_argument(SquarenessException);
+		}
+
+		const int Lenght = this->Length;
+		const int Height = this->Height;
+
+		for(int FirstIndex = 0; FirstIndex < Height; FirstIndex++) {
+
+			for(int SecondIndex = 0; SecondIndex < Length; SecondIndex++) {
+
+				if(InnerMatrix[SecondIndex][FirstIndex] != -InnerMatrix[FirstIndex][SecondIndex]) {
+
+					return false;
+				}
+			}
+		}
+
+		return true;
+	};
+	inline bool CheckSquareness() const {
+
+		return Length == Height;
+	};
+	inline bool CheckParameters() const {
+
+		return Length != 0 && Height != 0;
+	};
+	inline bool CheckNormality() const {
+
+		if(!CheckSquareness()) {
+
+			throw invalid_argument(SquarenessException);
+		}
+
+		return this->ConjugateTranspose().Multiply(*this) == this->Multiply(this->ConjugateTranspose());
+	};
+	inline CheckUnitarity() const {
+
+		if(!CheckSquareness()) {
+
+			throw invalid_argument(SquarenessException);
+		}
+
+		OmpMatrix<Type> Temporary(Height, Length);
+
+		return CheckNormality() && this->Multiply(this->ConjugateTranspose()) == Temporary.FillMainDiagonal(1);
+	};
 #pragma endregion
 
 #pragma region
@@ -466,7 +563,7 @@ public:
 
 		const int ThisLength = Length;
 		const int ThisHeight = Height;
-
+		
 		InnerMatrix = new Type*[ThisHeight];
 
 		omp_set_num_threads(NUMBER_OF_CORES);
@@ -565,8 +662,12 @@ public:
 
 	friend ostream& operator << (ostream& Stream, const OmpMatrix<Type>& SomeMatrix) {
 
-		const int Length = SomeMatrix.Length;
+		if(!SomeMatrix.CheckParameters()) {
 
+			throw invalid_argument(SomeMatrix.ParametersException);
+		}
+
+		const int Length = SomeMatrix.Length;
 		const int Height = SomeMatrix.Height;
 
 		for (int FirstIndex = 0; FirstIndex < Height; FirstIndex++) {
@@ -581,11 +682,14 @@ public:
 
 		return Stream;
 	};
-
 	friend istream& operator >> (istream& Stream, const OmpMatrix<Type>& SomeMatrix) {
 
-		const int Length = SomeMatrix.Length;
+		if(!SomeMatrix.CheckParameters()) {
 
+			throw invalid_argument(SomeMatrix.ParametersException);
+		}
+
+		const int Length = SomeMatrix.Length;
 		const int Height = SomeMatrix.Height;
 
 		for (int FirstIndex = 0; FirstIndex < Height; FirstIndex++) {
@@ -598,11 +702,36 @@ public:
 
 		return Stream;
 	};
+	bool operator == (const OmpMatrix& SomeMatrix) const{
 
+		if(!CheckParameters()) {
+
+			throw invalid_argument(ParametersException);
+		}
+
+		const int Length = this->Length;
+		const int Height = this->Height;
+
+		for(int FirstIndex = 0; FirstIndex < Height; FirstIndex++) {
+
+			for(int SecondIndex = 0; SecondIndex < Length; SecondIndex++) {
+
+				if(InnerMatrix[FirstIndex][SecondIndex] != SomeMatrix.InnerMatrix[FirstIndex][SecondIndex]) {
+
+					return false;
+				}
+			}
+		}
+
+		return true;
+	}
 
 	OmpMatrix Replace(int Position, const OmpMatrix& SomeVector) const {
 
-		CheckParameters();
+		if(!CheckParameters(ParametersException)) {
+
+			throw invalid_argument();
+		}
 
 		const int Length = this->Length;
 		const int Height = this->Height;
@@ -628,7 +757,10 @@ public:
 	};
 	OmpMatrix Cut(int StartX, int StartY, int EndX, int EndY) const {
 
-		CheckParameters();
+		if(!CheckParameters()) {
+
+			throw invalid_argument(ParametersException);
+		}
 
 		const int Height = (EndX - StartX) + 1;
 		const int Length = (EndY - StartY) + 1;
@@ -715,7 +847,10 @@ public:
 	};
 	OmpMatrix FillBand(int LowerSize, int UpperSize) const {
 
-		CheckSquareness();
+		if(!CheckSquareness()) {
+
+			throw invalid_argument(SquarenessException);
+		}
 
 		const int Length = this->Length;
 		const int Height = this->Height;
@@ -743,7 +878,10 @@ public:
 	};
 	OmpMatrix FillColumn(int Position, Type Value) const {
 
-		CheckParameters();
+		if(!CheckParameters()) {
+
+			throw invalid_argument(ParametersException);
+		}
 
 		const int Height = this->Height;
 
@@ -756,7 +894,10 @@ public:
 	};
     OmpMatrix UseFunction(Type(*Function)(Type)) const {
 
-		CheckParameters();
+		if(!CheckParameters()) {
+
+			throw invalid_argument(ParametersException);
+		}
 
 		const int Length = this->Length;
 		const int Height = this->Height;
@@ -775,7 +916,10 @@ public:
 	};
 	OmpMatrix FillRow(int Position, Type Value) const {
 
-		CheckParameters();
+		if(!CheckParameters()) {
+
+			throw invalid_argument(ParametersException);
+		}
 
 		const int Height = this->Height;
 
@@ -788,7 +932,10 @@ public:
 	};
 	OmpMatrix Reshape(int Height, int Length) const {
 
-		CheckParameters();
+		if(!CheckParameters()) {
+
+			throw invalid_argument(ParametersException);
+		}
 
 		const int ThisLength = this->Length;
 		const int ThisHeight = this->Height;
@@ -833,7 +980,10 @@ public:
 	};
 	OmpMatrix FillMainDiagonal(Type Value) const {
 
-		CheckSquareness();
+		if(!CheckSquareness()) {
+
+			throw invalid_argument(SquarenessException);
+		}
 
 		const int Height = this->Height;
 
@@ -846,7 +996,10 @@ public:
 	};
 	OmpMatrix FillSideDiagonal(Type Value) const {
 
-		CheckSquareness();
+		if(!CheckSquareness()) {
+
+			throw invalid_argument(SquarenessException);
+		}
 
 		const int Height = this->Height;
 
@@ -860,7 +1013,10 @@ public:
 	};
 	OmpMatrix FillSimmetrically() const {
 
-		CheckParameters();
+		if(!CheckParameters()) {
+
+			throw invalid_argument(ParametersException);
+		}
 
 		const int Length = this->Length;
 		const int Height = this->Height;
@@ -879,7 +1035,10 @@ public:
 	};
 	OmpMatrix Fill(Type Value) const {
 
-		CheckParameters();
+		if(!CheckParameters()) {
+
+			throw invalid_argument(ParametersException);
+		}
 
 		const int Length = this->Length;
 		const int Height = this->Height;
@@ -896,7 +1055,10 @@ public:
 	};
 	OmpMatrix Randomize() const {
 
-		CheckParameters();
+		if(!CheckParameters()) {
+
+			throw invalid_argument(ParametersException);
+		}
 
 		const int Length = this->Length;
 		const int Height = this->Height;
@@ -915,7 +1077,10 @@ public:
 	};
 	OmpMatrix Clear() const {
 
-		CheckParameters();
+		if(!CheckParameters()) {
+
+			throw invalid_argument(ParametersException);
+		}
 
 		const int Length = this->Length;
 		const int Height = this->Height;
@@ -932,7 +1097,10 @@ public:
 	};
 	OmpMatrix Print() const {
 
-		CheckParameters();
+		if(!CheckParameters()) {
+
+			throw invalid_argument(ParametersException);
+		}
 
 		const int Length = this->Length;
 		const int Height = this->Height;
@@ -983,7 +1151,10 @@ public:
 
 	OmpMatrix Subtract(const OmpMatrix& SomeMatrix) const {
 
-		CheckSummationAndSubtraction(SomeMatrix);
+		if(!CheckSummationAndSubtraction(SomeMatrix)) {
+
+			throw invalid_argument(SummationAndSubtractionException);
+		}
 
 		const int Length = this->Length;
 		const int Height = this->Height;
@@ -1006,7 +1177,10 @@ public:
 	};
 	OmpMatrix Multiply(const OmpMatrix& SomeMatrix) const {
 
-		CheckMultiplication(SomeMatrix);
+		if(!CheckMultiplication(SomeMatrix)) {
+
+			throw invalid_argument(MultiplicationException);
+		}
 
 		const int Length = SomeMatrix.Length;
 
@@ -1031,7 +1205,10 @@ public:
 	};
 	OmpMatrix Product(const OmpMatrix& SomeMatrix) const {
 
-		CheckSummationAndSubtraction(SomeMatrix);
+		if(!CheckSummationAndSubtraction(SomeMatrix)) {
+
+			throw invalid_argument(SummationAndSubtractionException);
+		}
 
 		const int Length = this->Length;
 		const int Height = this->Height;
@@ -1058,7 +1235,10 @@ public:
 	};
 	OmpMatrix Add(const OmpMatrix& SomeMatrix) const {
 
-		CheckSummationAndSubtraction(SomeMatrix);
+		if(!CheckSummationAndSubtraction(SomeMatrix)) {
+
+			throw invalid_argument(SummationAndSubtractionException);
+		}
 
 		const int Length = SomeMatrix.Length;
 		const int Height = SomeMatrix.Height;
@@ -1081,7 +1261,10 @@ public:
 	};
 	Type Scalar(const OmpMatrix& SomeMatrix) const {
 
-		CheckSummationAndSubtraction(SomeMatrix);
+		if(!CheckSummationAndSubtraction(SomeMatrix)) {
+
+			throw invalid_argument(SummationAndSubtractionException);
+		}
 
 		Type Value = 0;
 
@@ -1104,7 +1287,10 @@ public:
 	};
 	OmpMatrix Multiply(Type Coefficient) const {
 
-		CheckParameters();
+		if(!CheckParameters()) {
+
+			throw invalid_argument(ParametersException);
+		}
 
 		const int Length = this->Length;
 		const int Height = this->Height;
@@ -1127,7 +1313,10 @@ public:
 	};
 	OmpMatrix Exponentiate(int Power) const {
 
-		CheckSquareness();
+		if(!CheckSquareness()) {
+
+			throw invalid_argument(SquarenessException);
+		}
 
 		OmpMatrix<Type> Temporary(*this);
 
@@ -1138,9 +1327,36 @@ public:
 
 		return Temporary;
 	};
+	OmpMatrix ConjugateTranspose() const {
+
+		if(!CheckParameters()) {
+
+			throw invalid_argument(ParametersException);
+		}
+
+		const int Length = this->Length;
+		const int Height = this->Height;
+
+		OmpMatrix<Type> Temporary(*this);
+
+		#pragma omp parallel for schedule(static, NUMBER_OF_CORES)
+
+		for (int FirstIndex = 0; FirstIndex < Length; FirstIndex++) {
+
+			for (int SecondIndex = 0; SecondIndex < Height; SecondIndex++) {
+
+				Temporary.InnerMatrix[FirstIndex][SecondIndex] = conj(InnerMatrix[SecondIndex][FirstIndex]);
+			}
+		}
+
+		return Temporary;
+	};
 	OmpMatrix Transpose() const {
 
-		CheckParameters();
+		if(!CheckParameters()) {
+
+			throw invalid_argument(ParametersException);
+		}
 
 		const int Length = this->Length;
 		const int Height = this->Height;
@@ -1161,9 +1377,36 @@ public:
 
 		return Temporary;
 	};
+	OmpMatrix Conjugate() const {
+
+		if(!CheckParameters()) {
+
+			throw invalid_argument(ParametersException);
+		}
+
+		const int Length = this->Length;
+		const int Height = this->Height;
+
+		OmpMatrix<Type> Temporary(*this);
+
+		#pragma omp parallel for schedule(static, NUMBER_OF_CORES)
+
+		for (int FirstIndex = 0; FirstIndex < Length; FirstIndex++) {
+
+			for (int SecondIndex = 0; SecondIndex < Height; SecondIndex++) {
+
+				Temporary.InnerMatrix[FirstIndex][SecondIndex] = conj(InnerMatrix[FirstIndex][SecondIndex]);
+			}
+		}
+
+		return Temporary;
+	};
 	OmpMatrix Inverse() const {
 
-		CheckSquareness();
+		if(!CheckSquareness()) {
+
+			throw invalid_argument(SquarenessException);
+		}
 
 		const int Length = this->Length;
 		const int Height = this->Height;
@@ -1179,7 +1422,7 @@ public:
 		#pragma omp parallel for schedule(static, NUMBER_OF_CORES)
 
 		for (int FirstIndex = 1; FirstIndex < Height; FirstIndex++) {
-
+			
 			for (int SecondIndex = FirstIndex; SecondIndex < Height; SecondIndex++) {
 
 				double Coefficient = CheckDivisionByZero(Temporary.InnerMatrix[SecondIndex][FirstIndex - 1] / Temporary.InnerMatrix[FirstIndex - 1][FirstIndex - 1]);
@@ -1237,7 +1480,10 @@ public:
 	};
 	Type Determinant() const {
 
-		CheckSquareness();
+		if(!CheckSquareness()) {
+
+			throw invalid_argument(SquarenessException);
+		}
 
 		double Value = 1;
 
@@ -1346,7 +1592,10 @@ public:
 
 	tuple<OmpMatrix, OmpMatrix> LUFactorization() const {
 
-		CheckSquareness();
+		if(!CheckSquareness()) {
+
+			throw invalid_argument(SquarenessException);
+		}
 
 		const int Length = this->Length;
 		const int Height = this->Height;
@@ -1386,7 +1635,10 @@ public:
 	};
 	OmpMatrix CholeskyFactorization() const {
 
-		CheckSquareness();
+		if(!CheckSquareness()) {
+
+			throw invalid_argument(SquarenessException);
+		}
 
 		const int Length = this->Length;
 		const int Height = this->Height;
@@ -1423,7 +1675,10 @@ public:
 	};
 	OmpMatrix UpperFactorization() const {
 
-		CheckParameters();
+		if(!CheckParameters()) {
+
+			throw invalid_argument(ParametersException);
+		}
 
 		const int Length = this->Length;
 		const int Height = this->Height;
@@ -1450,7 +1705,10 @@ public:
 	};
 	OmpMatrix LowerFactorization() const {
 
-		CheckParameters();
+		if(!CheckParameters()) {
+
+			throw invalid_argument(ParametersException);
+		}
 
 		const int Length = this->Length;
 		const int Height = this->Height;
@@ -1477,9 +1735,68 @@ public:
 		return Temporary;
 	};
 
+	OmpMatrix GetMainDiagonal(int Bias = 0) const {
+
+		if(!CheckParameters()) {
+
+			throw invalid_argument(ParametersException);
+		}
+
+		const int Height = this->Height - fabs(Bias);
+
+		OmpMatrix<Type> Temporary(Height);
+
+		if (Bias > 0) {
+
+			for (int Index = 0; Index < Height; Index++) {
+
+				Temporary.InnerMatrix[Index][0] = InnerMatrix[Index][Index + Bias];
+			}
+		}
+		else {
+
+			for (int Index = 0; Index < Height; Index++) {
+
+				Temporary.InnerMatrix[Index][0] = InnerMatrix[Index + abs(Bias)][Index];
+			}
+		}
+
+		return Temporary;
+	};
+	OmpMatrix GetSideDiagonal(int Bias = 0) const {
+
+		if(!CheckParameters()) {
+
+			throw invalid_argument(ParametersException);
+		}
+
+		const int Height = this->Height - fabs(Bias);
+
+		OmpMatrix<Type> Temporary(Height);
+
+		if (Bias > 0) {
+
+			for (int Index = 0; Index < Height; Index++) {
+
+				Temporary.InnerMatrix[Index][0] = InnerMatrix[Index][Length - Index - 1 - Bias];
+			}
+		}
+		else {
+
+			for (int Index = 0; Index < Height; Index++) {
+
+				Temporary.InnerMatrix[Index][0] = InnerMatrix[Index + abs(Bias)][Length - Index - 1];
+			}
+		}
+
+		return Temporary;
+	};
 	OmpMatrix GetColumn(int Position) const {
 
-		CheckParameters();
+		if(!CheckParameters()) {
+
+			throw invalid_argument(ParametersException);
+		}
 
 		const int Height = this->Height;
 
@@ -1494,7 +1811,10 @@ public:
 	};
 	OmpMatrix GetRow(int Position) const {
 
-		CheckParameters();
+		if(!CheckParameters()) {
+
+			throw invalid_argument(ParametersException);
+		}
 
 		const int Length = this->Length;
 
@@ -1503,36 +1823,6 @@ public:
 		for (int Index = 0; Index < Length; Index++) {
 
 			Temporary.InnerMatrix[0][Index] = InnerMatrix[Position][Index];
-		}
-
-		return Temporary;
-	};
-	OmpMatrix GetMainDiagonal() const {
-
-		CheckParameters();
-
-		const int Height = this->Length;
-
-		OmpMatrix<Type> Temporary(Height);
-
-		for (int Index = 0; Index < Height; Index++) {
-
-			Temporary.InnerMatrix[Index][0] = InnerMatrix[Index][Index];
-		}
-
-		return Temporary;
-	};
-	OmpMatrix GetSideDiagonal() const {
-
-		CheckParameters();
-
-		const int Height = this->Height;
-
-		OmpMatrix<Type> Temporary(Height);
-
-		for (int Index = 0; Index < Height; Index++) {
-
-			Temporary.InnerMatrix[Index][0] = InnerMatrix[Index][Length - Index - 1];
 		}
 
 		return Temporary;
@@ -1554,9 +1844,127 @@ public:
 		return Height;
 	};
 
+	Type ColumnSum(int Position) const {
+
+		Type Value = 0;
+
+		const int Height = this->Height;
+
+		for (int Index = 0; Index < Height; Index++) {
+
+			Value += InnerMatrix[Index][Position];
+		}
+
+		return Value;
+	};
+	Type RowSum(int Position) const {
+
+		Type Value = 0;
+
+		const int Length = this->Length;
+
+		for (int Index = 0; Index < Length; Index++) {
+
+			Value += InnerMatrix[Position][Index];
+		}
+
+		return Value;
+	};
+	Type Average() const {
+
+		if(!CheckParameters()) {
+
+			throw invalid_argument(ParametersException);
+		}
+
+		Type Value = 0;
+
+		const int Length = this->Length;
+		const int Height = this->Height;
+
+		for (int FirstIndex = 0; FirstIndex < Height; FirstIndex++) {
+
+			for (int SecondIndex = 0; SecondIndex < Length; SecondIndex++) {
+
+				Value += InnerMatrix[FirstIndex][SecondIndex];
+			}
+		}
+
+		return Value / (Height * Length);
+	}
+	Type Rate() const {
+
+		if(!CheckParameters()) {
+
+			throw invalid_argument(ParametersException);
+		}
+
+		const int Length = this->Length;
+		const int Height = this->Height;
+
+		Type Value = 0;
+
+		for (int FirstIndex = 0; FirstIndex < Height; FirstIndex++) {
+
+			for (int SecondIndex = 0; SecondIndex < Length; SecondIndex++) {
+
+				Value += InnerMatrix[FirstIndex][SecondIndex] * InnerMatrix[FirstIndex][SecondIndex];
+			}
+		}
+
+		return sqrt(Value);
+	};
+	Type Max() const {
+
+		if(!CheckParameters()) {
+
+			throw invalid_argument(ParametersException);
+		}
+
+		Type Value = 0;
+
+		const int Length = this->Length;
+		const int Height = this->Height;
+
+		for (int FirstIndex = 0; FirstIndex < Height; FirstIndex++) {
+
+			for (int SecondIndex = 0; SecondIndex < Length; SecondIndex++) {
+
+				Value = InnerMatrix[FirstIndex][SecondIndex] > Value ? InnerMatrix[FirstIndex][SecondIndex] : Value;
+			}
+		}
+
+		return Value;
+	};
+	Type Min() const {
+
+		if(!CheckParameters()) {
+
+			throw invalid_argument(ParametersException);
+		}
+
+		Type Value = INFINITY;
+
+		const int Length = this->Length;
+		const int Height = this->Height;
+
+		for (int FirstIndex = 0; FirstIndex < Height; FirstIndex++) {
+
+			for (int SecondIndex = 0; SecondIndex < Length; SecondIndex++) {
+
+				Value = InnerMatrix[FirstIndex][SecondIndex] < Value ? InnerMatrix[FirstIndex][SecondIndex] : Value;
+			}
+		}
+
+		return Value;
+	};
+
 	vector<vector<Type>> ToVector() {
 
-		CheckParameters();
+		if(!CheckParameters()) {
+
+			throw invalid_argument(ParametersException);
+		}
 
 		const int Length = this->Length;
 		const int Height = this->Height;
@@ -1577,7 +1985,10 @@ public:
 	};
 	Type** ToPointer() {
 
-		CheckParameters();
+		if(!CheckParameters()) {
+
+			throw invalid_argument(ParametersException);
+		}
 
 		const int Length = this->Length;
 		const int Height = this->Height;
@@ -1595,109 +2006,6 @@ public:
 		}
 
 		return Temporary;
-	};
-
-	Type ColumnSum(int Position) {
-
-		Type Value = 0;
-
-		const int Height = this->Height;
-
-		for (int Index = 0; Index < Height; Index++) {
-
-			Value += InnerMatrix[Index][Position];
-		}
-
-		return Value;
-	};
-	Type RowSum(int Position) {
-
-		Type Value = 0;
-
-		const int Length = this->Length;
-
-		for (int Index = 0; Index < Length; Index++) {
-
-			Value += InnerMatrix[Position][Index];
-		}
-
-		return Value;
-	};
-	Type Average() {
-
-		CheckParameters();
-
-		Type Value = 0;
-
-		const int Length = this->Length;
-		const int Height = this->Height;
-
-		for (int FirstIndex = 0; FirstIndex < Height; FirstIndex++) {
-
-			for (int SecondIndex = 0; SecondIndex < Length; SecondIndex++) {
-
-				Value += InnerMatrix[FirstIndex][SecondIndex];
-			}
-		}
-
-		return Value / (Height * Length);
-	}
-	Type Rate() {
-
-		CheckParameters();
-
-		const int Length = this->Length;
-		const int Height = this->Height;
-
-		Type Value = 0;
-
-		for (int FirstIndex = 0; FirstIndex < Height; FirstIndex++) {
-
-			for (int SecondIndex = 0; SecondIndex < Length; SecondIndex++) {
-
-				Value += InnerMatrix[FirstIndex][SecondIndex] * InnerMatrix[FirstIndex][SecondIndex];
-			}
-		}
-
-		return sqrt(Value);
-	};
-	Type Max() {
-
-		CheckParameters();
-
-		Type Value = 0;
-
-		const int Length = this->Length;
-		const int Height = this->Height;
-
-		for (int FirstIndex = 0; FirstIndex < Height; FirstIndex++) {
-
-			for (int SecondIndex = 0; SecondIndex < Length; SecondIndex++) {
-
-				Value = InnerMatrix[FirstIndex][SecondIndex] > Value ? InnerMatrix[FirstIndex][SecondIndex] : Value;
-			}
-		}
-
-		return Value;
-	};
-	Type Min() {
-
-		CheckParameters();
-
-		Type Value = INFINITY;
-
-		const int Length = this->Length;
-		const int Height = this->Height;
-
-		for (int FirstIndex = 0; FirstIndex < Height; FirstIndex++) {
-
-			for (int SecondIndex = 0; SecondIndex < Length; SecondIndex++) {
-
-				Value = InnerMatrix[FirstIndex][SecondIndex] < Value ? InnerMatrix[FirstIndex][SecondIndex] : Value;
-			}
-		}
-
-		return Value;
 	};
 #pragma endregion
 };
